@@ -1,5 +1,10 @@
 
 public class DBufferCache {
+	private int _cacheSize;
+	
+	public DBufferCache(int cachesize) {
+		_cacheSize = cachesize;
+	}
 
     public DBuffer getBlock(int BlockID) {
         // TODO
