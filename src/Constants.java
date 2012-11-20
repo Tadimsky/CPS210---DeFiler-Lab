@@ -8,5 +8,4 @@ public class Constants {
 	};
 
 	public static final String vdiskName = "DSTORE.dat";
-
 }
