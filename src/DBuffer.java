@@ -43,4 +43,18 @@ public class DBuffer {
         // TODO
         return 0;
     }
+    
+    public void ioComplete() {
+        // TODO
+    }
+    
+    public int getBlockID() {
+        // TODO
+        return 0;
+    }
+    
+    public byte[] getBuffer() {
+        // TODO
+        return null;
+    }
 }
