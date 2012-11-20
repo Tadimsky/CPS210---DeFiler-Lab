@@ -18,4 +18,9 @@ public class DBufferCache {
     public void sync() {
         // TODO
     }
+    
+    public DBuffer getLRUBlock() {
+        // TODO
+        return null;
+    }
 }
