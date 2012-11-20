@@ -6,6 +6,10 @@ public class Constants {
 	public enum DiskOperationType {
 		READ, WRITE
 	};
+	
+	public  enum DBufferState {
+		CLEAN, DIRTY
+	};
 
 	public static final String vdiskName = "DSTORE.dat";
 }

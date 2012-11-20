@@ -1,6 +1,22 @@
-
 public class DBuffer {
 
+	private byte[] _buffer;
+	private int _blockid;
+	
+	private Constants.DBufferState _state;
+	private boolean _busy;
+	private boolean _isvalid;
+	
+	
+	public DBuffer(int size, int blockid)
+	{
+		_buffer = new byte[size];
+		_blockid = blockid;
+		_state = Constants.DBufferState.CLEAN;
+		_busy = false;
+		_isvalid = false;
+	}
+	
     public void startFetch() {
         // TODO
     }
