@@ -3,20 +3,31 @@ import java.util.List;
 
 public class DFS {
 
-    public void createFile(int ID, int size) {
-        // TODO
-    }
-    
-    public void destroyFile(int ID) {
-        // TODO
-    }
-    
-    public List<Byte> readFile(int ID, int bytes) {
+    public DFileID createDFile() {
         // TODO
         return null;
     }
     
-    public void writeFile(int ID, List<Byte> contents) {
+    public void destroyFile(DFileID dFID) {
+        // TODO
+    }
+    
+    public int read(DFileID dFID, byte[] ubuffer, int startOffset, int count) {
+        // TODO
+        return 0;
+    }
+    
+    public int write(DFileID dFID, byte[] ubuffer, int startOffset, int count) {
+        // TODO
+        return 0;
+    }
+    
+    public List<DFileID> listAllDFiles() {
+        // TODO
+        return null;
+    }
+    
+    public void sync() {
         // TODO
     }
 }
