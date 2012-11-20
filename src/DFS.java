@@ -3,6 +3,10 @@ import java.util.List;
 
 public class DFS {
 
+    public void init() {
+        // TODO
+    }
+    
     public DFileID createDFile() {
         // TODO
         return null;
