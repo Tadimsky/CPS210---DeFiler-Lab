@@ -1,5 +1,5 @@
 
-public class VDF implements VirtualDisk {
+public class VirtualDisk {
 
     public void startRequest(DBuffer dbuf, DiskOperationType rw) {
         // TODO
