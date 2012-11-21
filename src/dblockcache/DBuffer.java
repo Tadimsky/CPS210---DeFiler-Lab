@@ -83,8 +83,32 @@ public class DBuffer {
      * @param count reads begin at offset 0 and move at most count bytes
      */
     public int read (byte[] ubuffer, int startOffset, int count) {
-        // TODO
-        return 0;
+        // Need the Thread This
+    	
+    	
+    	if (_state == Constants.DBufferState.DIRTY)
+    		return -1;
+   
+    	// make sure startOffset does not exceed bounds
+    	if (startOffset < ubuffer.length || startOffset >= ubuffer.length)
+    		return -1;
+    	// number of bytes to copy
+    	int numcopy = count;
+    	if (count > _buffer.length)
+    		numcopy = _buffer.length;
+    	
+    	// make sure does not exceed bounds
+    	if (startOffset + numcopy >= ubuffer.length)
+    		return -1;
+    	
+    	// copy every byte from the ubuffer to the _buffer
+    	for (int i = startOffset; i < startOffset + numcopy; i++)
+    	{
+    		ubuffer[i] = _buffer[i-startOffset];
+    	}
+    	
+    	return numcopy;
+
     }
 
     /**
@@ -95,8 +119,31 @@ public class DBuffer {
      * @param count writes begin at offset 0 in dbuf and move at most count bytes
      */
     public int write (byte[] ubuffer, int startOffset, int count) {
-        // TODO
-        return 0;
+    	// Need the Thread This
+    	
+    	
+    	if (_state == Constants.DBufferState.DIRTY)
+    		return -1;
+   
+    	// make sure startOffset does not exceed bounds
+    	if (startOffset < ubuffer.length || startOffset >= ubuffer.length)
+    		return -1;
+    	// number of bytes to copy
+    	int numcopy = count;
+    	if (count > _buffer.length)
+    		numcopy = _buffer.length;
+    	
+    	// make sure does not exceed bounds
+    	if (startOffset + numcopy >= ubuffer.length)
+    		return -1;
+    	
+    	// copy every byte from the ubuffer to the _buffer
+    	for (int i = startOffset; i < startOffset + numcopy; i++)
+    	{
+    		ubuffer[i] = _buffer[i-startOffset];
+    	}
+   	
+    	return numcopy;
     }
 
     /**
