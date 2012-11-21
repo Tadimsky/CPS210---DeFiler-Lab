@@ -1,13 +1,15 @@
 package dfs;
 import java.util.List;
+import java.util.Map;
+import java.util.SortedSet;
 import common.INode;
 
 
 public class DFS {
     
-    private List<DFile> _dFiles;
-    private List<INode> _allocatedBlocks;
-    private List<INode> _freeBlocks;
+    private Map<DFileID, DFile> _dFiles;
+    private SortedSet<byte[]> _allocatedBlocks;
+    private SortedSet<byte[]> _freeBlocks;
     
     public DFS() {
         // TODO
@@ -30,8 +32,14 @@ public class DFS {
      * Creates a new DFile and returns the DFileID.
      */
     public DFileID createDFile() {
-        // TODO
-        return null;
+        byte[] fileStart = _freeBlocks.first();
+        _allocatedBlocks.add(_freeBlocks.first());
+        _freeBlocks.remove(_freeBlocks.first());
+        int dFID = 0;
+        while(_dFiles.containsKey(dFID)) dFID++;
+        DFileID fID = new DFileID(dFID);
+        DFile newFile = new DFile(fID, fileStart);
+        return fID;
     }
     
     /**
