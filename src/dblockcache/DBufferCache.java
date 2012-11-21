@@ -1,7 +1,10 @@
 package dblockcache;
 
+import java.util.TreeSet;
+
 public class DBufferCache {
 	private int _cacheSize;
+	private TreeSet<DBuffer> _bufferList;
 	
 	public DBufferCache(int cachesize) {
 		_cacheSize = cachesize;
