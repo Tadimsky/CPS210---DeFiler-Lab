@@ -39,6 +39,7 @@ public class DFS {
         while(_dFiles.containsKey(dFID)) dFID++;
         DFileID fID = new DFileID(dFID);
         DFile newFile = new DFile(fID, fileStart);
+        _dFiles.put(fID, newFile);
         return fID;
     }
     
