@@ -12,4 +12,12 @@ public class DFile {
         // TODO
     }
 
+    public DFileID get_dFID () {
+        return _dFID;
+    }
+
+    public void set_dFID (DFileID _dFID) {
+        this._dFID = _dFID;
+    }
+
 }
