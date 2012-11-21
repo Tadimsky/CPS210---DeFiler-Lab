@@ -1,8 +1,17 @@
 package dfs;
 import java.util.List;
+import common.INode;
 
 
 public class DFS {
+    
+    private List<DFile> _dFiles;
+    private List<INode> _allocatedBlocks;
+    private List<INode> _freeBlocks;
+    
+    public DFS() {
+        // TODO
+    }
 
     public void init() {
         // TODO
