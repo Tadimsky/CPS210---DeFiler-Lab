@@ -1,6 +1,7 @@
 package dblockcache;
 
 import common.Constants;
+import common.Constants.DBufferState;
 
 
 public class DBuffer {
@@ -71,8 +72,7 @@ public class DBuffer {
      * Check if the buffer is evictable: not evictable if I/O in progress, or buffer is held.
      */
     public boolean isBusy () {
-        // TODO
-        return false;
+    	return _busy;
     }
 
     /**
@@ -86,7 +86,7 @@ public class DBuffer {
         // Need the Thread This
     	
     	
-    	if (_state == Constants.DBufferState.DIRTY)
+    	if (_state == DBufferState.DIRTY)
     		return -1;
    
     	// make sure startOffset does not exceed bounds
@@ -119,12 +119,8 @@ public class DBuffer {
      * @param count writes begin at offset 0 in dbuf and move at most count bytes
      */
     public int write (byte[] ubuffer, int startOffset, int count) {
-    	// Need the Thread This
-    	
-    	
-    	if (_state == Constants.DBufferState.DIRTY)
-    		return -1;
-   
+    	// Need the Thread This   	
+       
     	// make sure startOffset does not exceed bounds
     	if (startOffset < ubuffer.length || startOffset >= ubuffer.length)
     		return -1;

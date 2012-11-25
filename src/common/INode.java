@@ -1,5 +1,8 @@
 package common;
 
+/*
+ * Stored on disk in order 
+ */
 public class INode {
     public INode next;
     public INode prev;
