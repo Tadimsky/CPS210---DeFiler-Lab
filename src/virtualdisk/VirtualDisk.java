@@ -2,12 +2,17 @@ package virtualdisk;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.util.LinkedList;
+import java.util.Queue;
+
 import common.Constants;
+import common.Constants.DiskOperationType;
 import dblockcache.DBuffer;
 
 
-public class VirtualDisk {
+public class VirtualDisk {	
 
+	private Queue<RequestObject> requestQueue;
 	private String _volName;
 	private RandomAccessFile _file;
 	private int _maxVolSize;
@@ -16,7 +21,7 @@ public class VirtualDisk {
 	 * VirtualDisk Constructors
 	 */
 	public VirtualDisk(String volName, boolean format) throws FileNotFoundException,
-			IOException {
+	IOException {
 
 		_volName = volName;
 		_maxVolSize = Constants.BLOCK_SIZE * Constants.NUM_OF_BLOCKS;
@@ -38,13 +43,14 @@ public class VirtualDisk {
 			formatStore();
 		}
 		/* Other methods as required */
+		requestQueue = new LinkedList<RequestObject>();
 	}
-	
+
 	public VirtualDisk(boolean format) throws FileNotFoundException,
 	IOException {
 		this(Constants.vdiskName, format);
 	}
-	
+
 	public VirtualDisk() throws FileNotFoundException,
 	IOException {
 		this(Constants.vdiskName, false);
@@ -56,11 +62,41 @@ public class VirtualDisk {
 	 * -- operation is either READ or WRITE  
 	 */
 	public void startRequest(DBuffer buf, Constants.DiskOperationType operation) throws IllegalArgumentException,
-			IOException
+	IOException
 	{
-		// TODO
+		synchronized (requestQueue) {
+			RequestObject ro = new RequestObject(buf, operation);
+			requestQueue.add(ro);
+		}				
 	}
-	
+
+
+	private void processQueue()
+	{
+		RequestObject ro;
+		synchronized (requestQueue) {
+			ro = requestQueue.poll();
+		}		
+		
+		if (ro == null)
+			return;
+		try {
+			if (ro.operation == DiskOperationType.READ)
+			{
+				readBlock(ro.dBuffer);
+			}
+			else
+			{
+				writeBlock(ro.dBuffer);
+			}
+		} catch (IOException e) {				
+			e.printStackTrace();
+		}			
+		finally {
+			ro.dBuffer.ioComplete();
+		}
+	}
+
 	/*
 	 * Clear the contents of the disk by writing 0s to it
 	 */
@@ -74,8 +110,8 @@ public class VirtualDisk {
 				_file.write(b, 0, Constants.BLOCK_SIZE);
 			} catch (Exception e) {
 				System.out
-						.println("Error in format: WRITE operation failed at the device block "
-								+ i);
+				.println("Error in format: WRITE operation failed at the device block "
+						+ i);
 			}
 		}
 	}
