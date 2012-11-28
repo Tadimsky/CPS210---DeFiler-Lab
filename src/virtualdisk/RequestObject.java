@@ -13,5 +13,4 @@ public class RequestObject {
 		dBuffer = db;
 		operation = dot;
 	}
-
 }
