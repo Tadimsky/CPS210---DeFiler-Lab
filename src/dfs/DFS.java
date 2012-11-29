@@ -1,4 +1,5 @@
 package dfs;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -108,8 +109,9 @@ public class DFS {
      * List DFileIDs for all existing DFiles in the volume.
      */
     public List<DFileID> listAllDFiles() {
-        // TODO
-        return null;
+        List<DFileID> fileList = new ArrayList<DFileID>();
+        fileList.addAll(_dFiles.keySet());
+        return fileList;
     }
 
     /**
