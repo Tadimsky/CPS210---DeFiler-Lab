@@ -153,15 +153,13 @@ public class DBuffer {
      * Called by VirtualDisk to get a reference point for the block
      */
     public int getBlockID () {
-        // TODO
-        return 0;
+        return _blockid;
     }
 
     /**
      * Called by VirtualDisk to get the contents of the buffer.
      */
     public byte[] getBuffer () {
-        // TODO
-        return null;
+        return _buffer;
     }
 }
