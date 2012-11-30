@@ -1,7 +1,10 @@
 package dblockcache;
 
+import java.io.IOException;
+import virtualdisk.VirtualDisk;
 import common.Constants;
 import common.Constants.DBufferState;
+import common.Constants.DiskOperationType;
 
 
 public class DBuffer {
@@ -12,27 +15,43 @@ public class DBuffer {
     private Constants.DBufferState _state;
     private boolean _busy;
     private boolean _isvalid;
+    private VirtualDisk _disk;
 
-    public DBuffer (int size, int blockid) {
+    public DBuffer (int size, int blockid, VirtualDisk d) {
         _buffer = new byte[size];
         _blockid = blockid;
         _state = Constants.DBufferState.CLEAN;
         _busy = false;
         _isvalid = false;
+        _disk = d;
     }
 
     /**
      * Start an asychronous fetch of associated block from this volume.
      */
     public void startFetch () {
+        _isvalid = false;
         // TODO
+        _isvalid = true;
     }
 
     /**
      * Start an asynchronous write of buffer contents to block on volume.
      */
     public void startPush () {
-        // TODO
+        if(DBufferState.CLEAN.equals(_state)) return;
+        try {
+            _disk.startRequest(this, DiskOperationType.WRITE);
+        }
+        catch (IllegalArgumentException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        _state = DBufferState.CLEAN;
     }
 
     /**

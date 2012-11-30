@@ -25,7 +25,7 @@ public class DBufferCache {
         if(_bufferList.getSize() >= _cacheSize) {
             _bufferList = _bufferList.getLRUNode();
         }
-        DBuffer buf = new DBuffer(common.Constants.BLOCK_SIZE, blockID);
+        DBuffer buf = new DBuffer(common.Constants.BLOCK_SIZE, blockID, _disk);
         buf.setBusy(true);
         _bufferList.addNode(buf);
         return buf;
