@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
+import virtualdisk.VirtualDisk;
 
 import common.Constants;
 import common.INode;
@@ -23,7 +24,7 @@ public class DFS {
     	_dFiles = new HashMap<DFileID, DFile>();
 
     	// Cache Size
-    	_cache = new DBufferCache(1024);
+    	_cache = new DBufferCache(1024, new VirtualDisk());
     }
     
     private void LoadDFileList()
