@@ -39,32 +39,45 @@ public class DBuffer {
      * Check whether the buffer has valid data.
      */
     public boolean checkValid () {
-        // TODO
-        return false;
+        return _isvalid;
     }
 
     /**
      * Wait until the buffer has valid data (i.e., wait for fetch to complete).
      * @return
      */
-    public boolean waitValid () {
-        // TODO
-        return false;
+    public synchronized boolean waitValid () {
+        while(!_isvalid)
+            try {
+                wait();
+            }
+            catch (InterruptedException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        return true;
     }
 
     /**
      * Check whether the buffer is dirty, i.e., has modified data to be written back
      */
     public boolean checkClean () {
-        // TODO
-        return false;
+        return Constants.DBufferState.CLEAN.equals(_state);
     }
 
     /**
      * Wait until the buffer is clean (i.e., wait for push to complete).
      */
-    public boolean waitClean () {
-        // TODO
+    public synchronized boolean waitClean () {
+        while(!Constants.DBufferState.CLEAN.equals(_state)) {
+            try {
+                wait();
+            }
+            catch (InterruptedException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
         return false;
     }
 
@@ -82,11 +95,11 @@ public class DBuffer {
      * @param startOffset for the ubuffer, not for dbuf
      * @param count reads begin at offset 0 and move at most count bytes
      */
-    public int read (byte[] ubuffer, int startOffset, int count) {
+    public synchronized int read (byte[] ubuffer, int startOffset, int count) {
         // Need the Thread This
     	
     	
-    	if (_state == DBufferState.DIRTY)
+    	if (DBufferState.DIRTY.equals(_state))
     		return -1;
    
     	// make sure startOffset does not exceed bounds
@@ -118,7 +131,7 @@ public class DBuffer {
      * @param startOffset for the ubuffer, not for dbuf
      * @param count writes begin at offset 0 in dbuf and move at most count bytes
      */
-    public int write (byte[] ubuffer, int startOffset, int count) {
+    public synchronized int write (byte[] ubuffer, int startOffset, int count) {
     	// Need the Thread This   	
        
     	// make sure startOffset does not exceed bounds
@@ -136,7 +149,7 @@ public class DBuffer {
     	// copy every byte from the ubuffer to the _buffer
     	for (int i = startOffset; i < startOffset + numcopy; i++)
     	{
-    		ubuffer[i] = _buffer[i-startOffset];
+    		_buffer[i-startOffset] = ubuffer[i];
     	}
    	
     	return numcopy;
