@@ -25,8 +25,11 @@ public class SortedDBuffer {
         _direction = direction;
         _size = 1;
     }
-    
-    public SortedDBuffer() {
+
+    /**
+     * Empty constructor for sorteddbuffer
+     */
+    public SortedDBuffer () {
         _direction = false;
         _size = 0;
     }
@@ -60,9 +63,11 @@ public class SortedDBuffer {
     }
 
     /**
-     * Finds and returns a good approximation of the least-recently-used buffer.
+     * Finds and removes a good approximation of the least-recently-used buffer.
      * As it traverses the tree, it flips the booleans associated with each node
-     * it passes so that the next access will yield a different buffer.
+     * it passes so that the next access will yield a different buffer. It then
+     * returns the head of the tree again, which may or may not have changed
+     * (depending on whether it was the LRU buffer).
      */
     public SortedDBuffer getLRUNode () {
         if (getNext() == null) {
@@ -118,6 +123,9 @@ public class SortedDBuffer {
         _right = new SortedDBuffer(buffer, false);
     }
 
+    /**
+     * Returns the number of nodes in the (sub)tree.
+     */
     public int getSize () {
         return _size;
     }
