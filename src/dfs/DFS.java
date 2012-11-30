@@ -127,7 +127,7 @@ public class DFS {
      * Write back all dirty blocks to the volume and wait for completion
      */
     public void sync() {
-        // TODO
+        _cache.sync();
     }
 }
 
