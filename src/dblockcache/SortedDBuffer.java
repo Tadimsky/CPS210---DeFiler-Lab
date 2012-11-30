@@ -1,5 +1,9 @@
 package dblockcache;
 
+import java.io.IOException;
+import common.Constants.DiskOperationType;
+import virtualdisk.VirtualDisk;
+
 /**
  * This class implements a binary search tree for DBuffers that handles the
  * heuristic algorithm for finding the least-recently-used buffer.
@@ -82,6 +86,26 @@ public class SortedDBuffer {
         getNext().getLRUNode();
         _direction = !_direction;
         return this;
+    }
+    
+    /**
+     * Writes all dirty buffers back to the disk.
+     * @param d destination for the writes
+     */
+    public void sync(VirtualDisk d) {
+        if(getLeft() != null) getLeft().sync(d);
+        if(getRight() != null) getRight().sync(d);
+        if(!_buffer.checkClean()) try {
+            d.startRequest(_buffer, DiskOperationType.WRITE);
+        }
+        catch (IllegalArgumentException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
     }
 
     /**

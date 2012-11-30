@@ -1,13 +1,15 @@
 package dblockcache;
 
-import java.util.TreeSet;
+import virtualdisk.VirtualDisk;
 
 
 public class DBufferCache {
     private int _cacheSize;
     private SortedDBuffer _bufferList;
+    private VirtualDisk _disk;
 
-    public DBufferCache (int cachesize) {
+    public DBufferCache (int cachesize, VirtualDisk vD) {
+        _disk = vD;
         _cacheSize = cachesize;
         _bufferList = new SortedDBuffer();
     }
@@ -42,6 +44,6 @@ public class DBufferCache {
      * Write back all dirty blocks to the volume, and wait for completion.
      */
     public void sync () {
-        // TODO
+        _bufferList.sync(_disk);
     }
 }
