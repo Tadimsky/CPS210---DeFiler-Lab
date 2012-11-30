@@ -47,12 +47,10 @@ public class DFS {
     		if (!block.checkValid())
     		{
     			block.waitValid();
-    		}    		
-    		DFileID dfid = new DFileID(i);
+    		}   		
     		
-    		
-    		DFile dfile = new DFile(dfid, ubuffer, blockmap);
-    		
+    		DFile dfile = INode.createDFile(block);   		
+    		_dFiles.put(dfile.get_dFID(), dfile);    		
     	}
     }
 
