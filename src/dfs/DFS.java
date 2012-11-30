@@ -1,4 +1,6 @@
 package dfs;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -7,7 +9,6 @@ import java.util.SortedSet;
 import virtualdisk.VirtualDisk;
 
 import common.Constants;
-import common.INode;
 import dblockcache.DBuffer;
 import dblockcache.DBufferCache;
 
@@ -24,7 +25,17 @@ public class DFS {
     	_dFiles = new HashMap<DFileID, DFile>();
 
     	// Cache Size
-    	_cache = new DBufferCache(1024, new VirtualDisk());
+    	try {
+            _cache = new DBufferCache(1024, new VirtualDisk());
+        }
+        catch (FileNotFoundException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
     }
     
     private void LoadDFileList()
