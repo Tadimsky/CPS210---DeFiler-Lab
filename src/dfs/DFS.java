@@ -55,7 +55,15 @@ public class DFS {
      * Build a list of all allocated and free blocks on the VirtualDisk
      */
     public void init() {
-        // TODO
+        for(DFileID id : _dFiles.keySet()) {
+            DFile d = _dFiles.get(id);
+            // TODO Check that each DFile has exactly one INode
+            if(d.getSize() > common.Constants.MAX_FILE_BLOCKS) return;
+            // TODO Check that the block maps of all DFiles have a valid block number for every block in the DFile
+            // TODO Check that no data block is listed for more than one DFile
+        }
+        // TODO Build the list of DFiles on the disk by scanning the INode region
+        // TODO Build a list of all allocated and free blocks on the VirtualDisk
     }
     
     /**
