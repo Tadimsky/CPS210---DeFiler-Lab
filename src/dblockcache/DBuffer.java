@@ -111,65 +111,94 @@ public class DBuffer {
     }
 
     /**
-     * Reads into the ubuffer[] from the contents of this Dbuffer dbuf.
+     * Reads into the ubuffer[] from the contents of this DBuffer dbuf.
      * Check first that the dbuf has a valid copy of the data!
-     * 
      * @param ubuffer destination
-     * @param startOffset for the ubuffer, not for dbuf
-     * @param count reads begin at offset 0 and move at most count bytes
+     * @param startOffset for the ubuffer, not for dbuf. The index to start writing in the ubuffer
+     * @param count reads begin at offset 0 and move at most count bytes. Don't make this bigger than the block size.
      */
     public synchronized int read (byte[] ubuffer, int startOffset, int count) {
         // Need the Thread This
-
-        if (DBufferState.DIRTY.equals(_state)) return -1;
-
-        // make sure startOffset does not exceed bounds
-        if (startOffset < ubuffer.length || startOffset >= ubuffer.length)
-            return -1;
-        // number of bytes to copy
-        int numcopy = count;
-        if (count > _buffer.length) numcopy = _buffer.length;
-
-        // make sure does not exceed bounds
-        if (startOffset + numcopy >= ubuffer.length) return -1;
-
-        // copy every byte from the ubuffer to the _buffer
-        for (int i = startOffset; i < startOffset + numcopy; i++) {
-            ubuffer[i] = _buffer[i - startOffset];
-        }
-
-        return numcopy;
+    	
+    	
+    	if (_state == DBufferState.DIRTY)
+    		return -1;
+   
+    	// make sure startOffset does not exceed bounds
+    	if (startOffset < 0 || startOffset >= ubuffer.length)
+    		return -1;
+    	// number of bytes to copy
+    	int numcopy = count;
+    	if (count > _buffer.length)
+    		numcopy = _buffer.length;
+    	
+    	// make sure does not exceed bounds
+    	if (startOffset + numcopy >= ubuffer.length)
+    		return -1;
+    	
+    	// copy every byte from the ubuffer to the _buffer
+    	for (int i = startOffset; i < startOffset + numcopy; i++)
+    	{
+    		// if we hit the end of the file
+    		if (_buffer[i-startOffset] == 0xffffffff)
+    		{
+    			ubuffer[i] = '\0';
+    			return i;
+    		}
+    		else
+    		{    		
+    			// continue the read
+    			ubuffer[i] = _buffer[i-startOffset];
+    		}
+    	}
+    	
+    	return numcopy;
 
     }
 
     /**
-     * Writes into this Dbuffer dbuf from the contents of ubuffer[].
+     * Writes into this DBuffer dbuf from the contents of ubuffer[].
      * Mark dbuf dirty!
-     * 
      * @param ubuffer source
-     * @param startOffset for the ubuffer, not for dbuf
-     * @param count writes begin at offset 0 in dbuf and move at most count
-     *        bytes
+     * @param startOffset for the ubuffer, not for dbuf from which to read from.
+     * @param count writes begin at offset 0 in dbuf and move at most count bytes
      */
     public synchronized int write (byte[] ubuffer, int startOffset, int count) {
-        // Need the Thread This
-
-        // make sure startOffset does not exceed bounds
-        if (startOffset < ubuffer.length || startOffset >= ubuffer.length)
-            return -1;
-        // number of bytes to copy
-        int numcopy = count;
-        if (count > _buffer.length) numcopy = _buffer.length;
-
-        // make sure does not exceed bounds
-        if (startOffset + numcopy >= ubuffer.length) return -1;
-
-        // copy every byte from the ubuffer to the _buffer
-        for (int i = startOffset; i < startOffset + numcopy; i++) {
-            _buffer[i - startOffset] = ubuffer[i];
-        }
-
-        return numcopy;
+    	// Need the Thread This  	
+       
+    	// make sure startOffset does not exceed bounds
+    	if (startOffset < 0 || startOffset >= ubuffer.length)
+    		return -1;
+    	// number of bytes to copy
+    	int numcopy = count;
+    	if (count > _buffer.length)
+    		numcopy = _buffer.length;
+    	
+    	// make sure does not exceed bounds
+    	if (startOffset + numcopy >= ubuffer.length)
+    		return -1;
+    	
+    	// Mark this DBuffer as dirty as we've written data to it.
+    	_state = DBufferState.DIRTY;
+    	
+    	// copy every byte from the ubuffer to the _buffer
+    	for (int i = startOffset; i < startOffset + numcopy; i++)
+    	{
+    		// if we reach the end of the file
+    		if (ubuffer[i] == '\0')
+    		{
+    			// mark the buffer as end of file
+    			_buffer[i - startOffset] = 0xffffffff;
+    			return i;
+    		}
+    		else
+    		{    		
+    			// continue the read
+    			_buffer[i - startOffset] = ubuffer[i];
+    		}
+    		_buffer[i-startOffset] = ubuffer[i];
+    	}   	
+    	return numcopy;
     }
 
     /**

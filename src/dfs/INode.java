@@ -65,12 +65,11 @@ public class INode {
 			ByteArrayOutputStream bos = new ByteArrayOutputStream();
 			DataOutputStream dos = new DataOutputStream(bos);
 			dos.writeInt(file.get_dFID().get_dFID());
-			dos.writeInt(file.getSize());
+			dos.writeInt(file.getSize());			
 			
-			int[] blockmap = file.getBlockMap();
 			for (int i = 0; i < Constants.NUM_OF_BLOCKS; i++)
 			{
-				dos.writeInt(blockmap[i]);
+				dos.writeInt(file.getMappedBlock(i));
 			}			
 			dos.close();
 			// Create a new byte array of the correct size

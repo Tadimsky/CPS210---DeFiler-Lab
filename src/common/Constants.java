@@ -15,4 +15,14 @@ public class Constants {
 	};
 
 	public static final String vdiskName = "DSTORE.dat";
+	
+	/**
+	 * Returns the number of blocks that are needed to store the given file size
+	 * @param size The size of the file
+	 * @return The number of blocks required to store a file of size 
+	 */
+	public static int BlocksRequired(int size)
+	{
+		return (int)Math.ceil((double)size / (double)Constants.BLOCK_SIZE);
+	}
 }
