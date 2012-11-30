@@ -1,12 +1,14 @@
 package dfs;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
+import virtualdisk.VirtualDisk;
 
 import common.Constants;
-import common.INode;
 import dblockcache.DBuffer;
 import dblockcache.DBufferCache;
 
@@ -23,7 +25,17 @@ public class DFS {
     	_dFiles = new HashMap<DFileID, DFile>();
 
     	// Cache Size
-    	_cache = new DBufferCache(1024);
+    	try {
+            _cache = new DBufferCache(1024, new VirtualDisk());
+        }
+        catch (FileNotFoundException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
     }
     
     private void LoadDFileList()
@@ -54,7 +66,15 @@ public class DFS {
      * Build a list of all allocated and free blocks on the VirtualDisk
      */
     public void init() {
-        // TODO
+        for(DFileID id : _dFiles.keySet()) {
+            DFile d = _dFiles.get(id);
+            // TODO Check that each DFile has exactly one INode
+            if(d.getSize() > common.Constants.MAX_FILE_BLOCKS) return;
+            // TODO Check that the block maps of all DFiles have a valid block number for every block in the DFile
+            // TODO Check that no data block is listed for more than one DFile
+        }
+        // TODO Build the list of DFiles on the disk by scanning the INode region
+        // TODO Build a list of all allocated and free blocks on the VirtualDisk
     }
     
     /**
@@ -118,7 +138,7 @@ public class DFS {
      * Write back all dirty blocks to the volume and wait for completion
      */
     public void sync() {
-        // TODO
+        _cache.sync();
     }
 }
 
