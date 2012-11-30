@@ -19,8 +19,12 @@ public class DBufferCache {
      * @param BlockID name of block
      */
     public DBuffer getBlock (int blockID) {
-        // TODO
-        return null;
+        if(_bufferList.getSize() >= _cacheSize) {
+            _bufferList = _bufferList.getLRUNode();
+        }
+        DBuffer buf = new DBuffer(common.Constants.BLOCK_SIZE, blockID);
+        _bufferList.addNode(buf);
+        return buf;
     }
 
     /**
@@ -37,12 +41,5 @@ public class DBufferCache {
      */
     public void sync () {
         // TODO
-    }
-
-    /**
-     * Called by releaseBlock to determine heuristically which block to release.
-     */
-    public DBuffer getLRUBlock () {
-        return _bufferList.getLRUNode().getBuffer();
     }
 }

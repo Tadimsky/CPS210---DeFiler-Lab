@@ -11,6 +11,7 @@ public class SortedDBuffer {
     private SortedDBuffer _left;
     private SortedDBuffer _right;
     private boolean _direction;
+    private int _size;
 
     /**
      * Constructor for sorteddbuffer
@@ -22,6 +23,7 @@ public class SortedDBuffer {
     public SortedDBuffer (DBuffer buffer, boolean direction) {
         _buffer = buffer;
         _direction = direction;
+        _size = 1;
     }
 
     /**
@@ -30,6 +32,7 @@ public class SortedDBuffer {
      * @param buffer data for the new node
      */
     public void addNode (DBuffer buffer) {
+        _size++;
         SortedDBuffer currentNode = this;
         if (buffer.getBlockID() < currentNode.getBuffer().getBlockID()) {
             if (currentNode.getLeft() == null) {
@@ -53,14 +56,18 @@ public class SortedDBuffer {
      * it passes so that the next access will yield a different buffer.
      */
     public SortedDBuffer getLRUNode () {
-        if (!_direction && _left == null) return this;
-        if (_direction && _right == null) return this;
-        SortedDBuffer child;
-        if (!_direction)
-            child = _left.getLRUNode();
-        else child = _right.getLRUNode();
+        if(getNext() == null) {
+            _size--;
+            return getOther();
+        }
+        if(getNext().getNext() == null) {
+            setNext(getNext().getOther());
+            _size--;
+            return this;
+        }
+        getNext().getLRUNode();
         _direction = !_direction;
-        return child;
+        return this;
     }
 
     /**
@@ -77,12 +84,31 @@ public class SortedDBuffer {
     private SortedDBuffer getRight () {
         return _right;
     }
+    
+    private SortedDBuffer getNext () {
+        if(!_direction) return _left;
+        return _right;
+    }
+    
+    private SortedDBuffer getOther () {
+        if(!_direction) return _right;
+        return _left;
+    }
 
+    private void setNext (SortedDBuffer buf) {
+        if(!_direction) _left = buf;
+        else _right = buf;
+    }
+    
     private void setLeft (DBuffer buffer) {
         _left = new SortedDBuffer(buffer, true);
     }
 
     private void setRight (DBuffer buffer) {
         _right = new SortedDBuffer(buffer, false);
+    }
+    
+    public int getSize() {
+        return _size;
     }
 }
