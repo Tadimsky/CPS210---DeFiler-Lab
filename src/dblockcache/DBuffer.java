@@ -175,4 +175,8 @@ public class DBuffer {
     public byte[] getBuffer () {
         return _buffer;
     }
+    
+    public void setBusy(boolean b) {
+        _busy = b;
+    }
 }

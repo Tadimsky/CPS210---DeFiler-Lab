@@ -23,6 +23,7 @@ public class DBufferCache {
             _bufferList = _bufferList.getLRUNode();
         }
         DBuffer buf = new DBuffer(common.Constants.BLOCK_SIZE, blockID);
+        buf.setBusy(true);
         _bufferList.addNode(buf);
         return buf;
     }
@@ -33,11 +34,11 @@ public class DBufferCache {
      * @param dbuf buffer to be released
      */
     public void releaseBlock (DBuffer dbuf) {
-        // TODO
+        dbuf.setBusy(false);
     }
 
     /**
-     * Write back all dirty blocks tot he volume, and wait for completion.
+     * Write back all dirty blocks to the volume, and wait for completion.
      */
     public void sync () {
         // TODO
