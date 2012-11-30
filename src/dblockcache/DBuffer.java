@@ -27,21 +27,29 @@ public class DBuffer {
     }
 
     /**
-     * Start an asychronous fetch of associated block from this volume.
+     * Start an asynchronous fetch of associated block from this volume.
      */
     public void startFetch () {
         _isvalid = false;
-        // TODO
-        _isvalid = true;
+        _busy = true;
+        
+    	try {
+			_disk.startRequest(this, DiskOperationType.READ);
+		} catch (IllegalArgumentException e) {		 
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
     }
 
     /**
      * Start an asynchronous write of buffer contents to block on volume.
      */
-    public void startPush () {
+    public void startPush () {    	
         if (DBufferState.CLEAN.equals(_state)) {
             return;
         }
+        _busy = true;
         try {
             _disk.startRequest(this, DiskOperationType.WRITE);
         }
@@ -51,7 +59,11 @@ public class DBuffer {
         catch (IOException e) {
             e.printStackTrace();
         }
-        _state = DBufferState.CLEAN;
+        // Data will be written to the disk - Clean
+        synchronized (_state) {
+        	_state = DBufferState.CLEAN;
+        	notifyAll();
+		}
     }
 
     /**
@@ -117,9 +129,7 @@ public class DBuffer {
      * @param startOffset for the ubuffer, not for dbuf. The index to start writing in the ubuffer
      * @param count reads begin at offset 0 and move at most count bytes. Don't make this bigger than the block size.
      */
-    public synchronized int read (byte[] ubuffer, int startOffset, int count) {
-        // Need the Thread This
-    	
+    public synchronized int read (byte[] ubuffer, int startOffset, int count) {   	
     	
     	if (_state == DBufferState.DIRTY)
     		return -1;
@@ -150,10 +160,8 @@ public class DBuffer {
     			// continue the read
     			ubuffer[i] = _buffer[i-startOffset];
     		}
-    	}
-    	
+    	}    	
     	return numcopy;
-
     }
 
     /**
@@ -164,7 +172,6 @@ public class DBuffer {
      * @param count writes begin at offset 0 in dbuf and move at most count bytes
      */
     public synchronized int write (byte[] ubuffer, int startOffset, int count) {
-    	// Need the Thread This  	
        
     	// make sure startOffset does not exceed bounds
     	if (startOffset < 0 || startOffset >= ubuffer.length)
@@ -204,8 +211,14 @@ public class DBuffer {
     /**
      * Called by VirtualDisk when it finishes working with the file.
      */
-    public void ioComplete () {
-        // TODO
+    public synchronized void ioComplete () {
+    	// The DBuffer is now valid if it is returning from a Read 
+    	_isvalid = true;
+    	// The DBuffer is no longer busy
+    	_busy = false;
+    	
+    	// Wake up people who are waiting for the state to change
+    	notifyAll();
     }
 
     /**
