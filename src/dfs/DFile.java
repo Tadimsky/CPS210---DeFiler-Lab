@@ -12,7 +12,7 @@ public class DFile {
     	_dFID = dFID;
     }
     
-    public DFile(DFileID dFID, byte[] ubuffer, int size, int[] map)
+    public DFile(DFileID dFID, int size, int[] map)
     {
     	this(dFID);
     	_blockmap = map;

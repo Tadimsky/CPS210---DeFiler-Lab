@@ -16,8 +16,8 @@ import dblockcache.DBufferCache;
 public class DFS {
     
     private Map<DFileID, DFile> _dFiles;
-    private SortedSet<byte[]> _allocatedBlocks;
-    private SortedSet<byte[]> _freeBlocks;
+    private SortedSet<Integer> _allocatedBlocks;
+    private SortedSet<Integer> _freeBlocks;
     
     DBufferCache _cache;
     
@@ -38,11 +38,15 @@ public class DFS {
         }
     }
     
+    /**
+     * Loads a list of all the files from the INodes on the Disk.
+     */
     private void LoadDFileList()
     {
+    	// Iterate through the blocks from 1 to the number of files
     	for (int i = 1; i <= Constants.MAX_FILES; i++)
     	{
-    		// Get the INodes from the Disk
+    		// Get the INode from the Disk
     		DBuffer block = _cache.getBlock(i);
     		if (!block.checkValid())
     		{
@@ -79,13 +83,14 @@ public class DFS {
      * Creates a new DFile and returns the DFileID.
      */
     public DFileID createDFile() {
-        byte[] fileStart = _freeBlocks.first();
+        int fileStart = _freeBlocks.first();
         _allocatedBlocks.add(_freeBlocks.first());
         _freeBlocks.remove(_freeBlocks.first());
         int dFID = 0;
         while(_dFiles.containsKey(dFID)) dFID++;
         DFileID fID = new DFileID(dFID);
-        DFile newFile = new DFile(fID, fileStart);
+        DFile newFile = new DFile(fID);
+        newFile.MapBlock(0, fileStart);
         _dFiles.put(fID, newFile);
         return fID;
     }

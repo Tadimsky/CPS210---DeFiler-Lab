@@ -40,10 +40,9 @@ public class INode {
 				// TODO: error checking?
 				blockmap[i] = dis.readInt();
 			}
-			// initialize the buffer array for the file
-			byte[] buff = new byte[size];
+			// initialize the buffer array for the file			
 			
-			return new DFile(dfid, buff, size, blockmap);
+			return new DFile(dfid, size, blockmap);
 		} 
     	catch (IOException e) {
 			// TODO Auto-generated catch block
