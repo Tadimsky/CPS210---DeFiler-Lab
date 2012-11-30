@@ -9,6 +9,7 @@ public class DBufferCache {
 
     public DBufferCache (int cachesize) {
         _cacheSize = cachesize;
+        _bufferList = new SortedDBuffer();
     }
 
     /**

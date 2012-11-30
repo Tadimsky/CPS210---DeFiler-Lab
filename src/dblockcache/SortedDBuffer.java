@@ -25,6 +25,11 @@ public class SortedDBuffer {
         _direction = direction;
         _size = 1;
     }
+    
+    public SortedDBuffer() {
+        _direction = false;
+        _size = 0;
+    }
 
     /**
      * Adds a node to the proper location in the binary search tree
@@ -33,6 +38,10 @@ public class SortedDBuffer {
      */
     public void addNode (DBuffer buffer) {
         _size++;
+        if (_buffer == null) {
+            _buffer = buffer;
+            return;
+        }
         SortedDBuffer currentNode = this;
         if (buffer.getBlockID() < currentNode.getBuffer().getBlockID()) {
             if (currentNode.getLeft() == null) {
@@ -56,11 +65,11 @@ public class SortedDBuffer {
      * it passes so that the next access will yield a different buffer.
      */
     public SortedDBuffer getLRUNode () {
-        if(getNext() == null) {
+        if (getNext() == null) {
             _size--;
             return getOther();
         }
-        if(getNext().getNext() == null) {
+        if (getNext().getNext() == null) {
             setNext(getNext().getOther());
             _size--;
             return this;
@@ -84,22 +93,23 @@ public class SortedDBuffer {
     private SortedDBuffer getRight () {
         return _right;
     }
-    
+
     private SortedDBuffer getNext () {
-        if(!_direction) return _left;
+        if (!_direction) return _left;
         return _right;
     }
-    
+
     private SortedDBuffer getOther () {
-        if(!_direction) return _right;
+        if (!_direction) return _right;
         return _left;
     }
 
     private void setNext (SortedDBuffer buf) {
-        if(!_direction) _left = buf;
+        if (!_direction)
+            _left = buf;
         else _right = buf;
     }
-    
+
     private void setLeft (DBuffer buffer) {
         _left = new SortedDBuffer(buffer, true);
     }
@@ -107,8 +117,9 @@ public class SortedDBuffer {
     private void setRight (DBuffer buffer) {
         _right = new SortedDBuffer(buffer, false);
     }
-    
-    public int getSize() {
+
+    public int getSize () {
         return _size;
     }
+
 }
