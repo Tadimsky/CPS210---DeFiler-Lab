@@ -43,6 +43,14 @@ public class TestClient implements Runnable{
 		Print("Read bytes", Integer.toString(bytes));
 		return new String(read);
 	}
+	
+	private String ReadTestPartial(DFileID f, int index, int count)
+	{
+		byte[] read = new byte[count];
+		int bytes = dfiler.read(f, read, index, count);
+		Print("Read bytes", Integer.toString(bytes));
+		return new String(read);
+	}
 
 	@Override
 	public void run() {
@@ -63,6 +71,11 @@ public class TestClient implements Runnable{
 		WriteTest(nf, "TEST TWO");
 		Print("Writing", "Test Two");
 		Print("Read", ReadTest(nf));
+		
+		WriteTest(nf, "TEST THREE");
+		Print("Read", ReadTestPartial(nf, 6, 4)); // Should be Test
+		
+		dfiler.sync();
 	}
 	
 	public static void main(String[] args) 
@@ -73,7 +86,7 @@ public class TestClient implements Runnable{
 		// Run NUM_WORKERS threads 
 		for (int i = 0; i < NUM_WORKERS; i++)
 		{
-			TestClient tc = new TestClient(dfiler, file);
+			TestClient tc = new TestClient(dfiler, file, i);
 			Thread f = new Thread(tc);
 			f.run();
 		}
