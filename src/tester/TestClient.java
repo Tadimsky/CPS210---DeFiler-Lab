@@ -55,17 +55,10 @@ public class TestClient implements Runnable{
 
 	@Override
 	public void run() {
+		System.out.println("BOO");
 		WriteTest(conc, "INTIAL");
 		Print("Read", ReadTest(conc));		
-		synchronized (this) {
-			// Wait for a bit
-			try {
-				wait(new Random().nextInt(1000));
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}			
-		}		
+		
 		System.out.println(ReadTest(conc));
 		DFileID nf = dfiler.createDFile();
 		Print("Created DFile", Integer.toString(nf.get_dFID()));		
@@ -89,8 +82,8 @@ public class TestClient implements Runnable{
 	}
 	
 	public static void main(String[] args) 
-	{
-		
+	{		
+		System.out.println("BOO");
 		DFS dfiler = new DFS();
 		dfiler.init();
 		DFileID file = dfiler.createDFile();
@@ -99,7 +92,7 @@ public class TestClient implements Runnable{
 		{
 			TestClient tc = new TestClient(dfiler, file, i);
 			Thread f = new Thread(tc);
-			f.run();
+			f.start();
 		}
 	}
 }
