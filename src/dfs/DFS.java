@@ -49,6 +49,7 @@ public class DFS {
             // Get the INode from the Disk
             DBuffer block = _cache.getBlock(i);
             if (!block.checkValid()) {
+                block.startFetch();
                 block.waitValid();
             }
 
@@ -130,7 +131,6 @@ public class DFS {
      * @param count at most count bytes are transferred
      */
     public int read (DFileID dFID, byte[] ubuffer, int startOffset, int count) {
-        // TODO
         return 0;
     }
 
