@@ -135,8 +135,9 @@ public class DFS {
      * @param count at most count bytes are transferred
      */
     public int read (DFileID dFID, byte[] ubuffer, int startOffset, int count) {
-        // TODO
-        return 0;
+        DBuffer d = _cache.getBlock(dFID.get_dFID());
+        d.read(ubuffer, startOffset, count);
+        return count;
     }
 
     /**
@@ -149,8 +150,9 @@ public class DFS {
      * @return
      */
     public int write (DFileID dFID, byte[] ubuffer, int startOffset, int count) {
-        // TODO
-        return 0;
+        DBuffer d = _cache.getBlock(dFID.get_dFID());
+        d.write(ubuffer, startOffset, count);
+        return count;
     }
 
     /**
