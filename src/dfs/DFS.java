@@ -10,6 +10,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
+
+import com.sun.xml.internal.bind.v2.runtime.reflect.opt.Const;
+
 import virtualdisk.VirtualDisk;
 import common.Constants;
 import dblockcache.DBuffer;
@@ -78,18 +81,27 @@ public class DFS {
         for (DFileID id : _dFiles.keySet()) {
             DFile d = _dFiles.get(id);
             // TODO Check that each DFile has exactly one INode
-            if (d.getSize() > common.Constants.MAX_FILE_BLOCKS) return;
+            if (d.getSize() > common.Constants.MAX_FILE_BLOCKS * Constants.BLOCK_SIZE) return;
             // TODO Check that the block maps of all DFiles have a valid block
             // number for every block in the DFile
             // TODO Check that no data block is listed for more than one DFile
         }
         
-        for (int i = 0; i < common.Constants.NUM_OF_BLOCKS; i++) {
-            if (_dFiles.keySet().contains(new DFileID(i))) {
-                _allocatedBlocks.add(i);
-            }
-            else {
-                _freeBlocks.add(i);
+        for (DFile file : _dFiles.values())
+    	{
+    		for (int j = 0; j < Constants.NUM_OF_BLOCKS; j++)
+    		{
+    			int blockid = file.getMappedBlock(j);
+    			if (blockid == -1)
+    				break;
+    			_allocatedBlocks.add(blockid);
+    		}
+    	}
+        
+        for (int i = Constants.MAX_FILES + 1; i < common.Constants.NUM_OF_BLOCKS; i++) {
+        	if (!_allocatedBlocks.contains(i))
+        	{
+        		_freeBlocks.add(i);
             }
         }
     }
@@ -97,17 +109,19 @@ public class DFS {
     /**
      * Creates a new DFile and returns the DFileID.
      */
-    public DFileID createDFile () {
+    public synchronized DFileID createDFile () {
         int fileStart = _freeBlocks.first();
         _allocatedBlocks.add(_freeBlocks.first());
         _freeBlocks.remove(_freeBlocks.first());
         int dFID = 0;
-        while (_dFiles.containsKey(dFID))
-            dFID++;
         DFileID fID = new DFileID(dFID);
-        DFile newFile = new DFile(fID);
+        while (_dFiles.containsKey(fID))
+            dFID++;
+        fID.set_dFID(dFID);
+        DFile newFile = new DFile(fID);        
         newFile.MapBlock(0, fileStart);
         _dFiles.put(fID, newFile);
+        
         return fID;
     }
 

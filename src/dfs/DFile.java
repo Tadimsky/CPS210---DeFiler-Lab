@@ -109,7 +109,7 @@ public class DFile {
     		if (_blockmap[i] == -1)
     			throw new Exception("Not enough blocks allocated. Please ensure you have allocated the correct number of blocks to the DFile (" + newblocks + ").");
     	}
-    }
+    }    
 
     public DFileID get_dFID () {
         return _dFID;

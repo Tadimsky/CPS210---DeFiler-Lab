@@ -8,7 +8,7 @@ import dfs.DFileID;
 
 
 public class TestClient implements Runnable{
-	private static final int NUM_WORKERS = 1;
+	private static final int NUM_WORKERS = 10;
 	
 	DFS dfiler;
 	DFileID conc;
@@ -33,15 +33,15 @@ public class TestClient implements Runnable{
 	private void WriteTest(DFileID f, String t)
 	{
 		byte[] data = t.getBytes();
-		dfiler.write(f, data, 0, data.length - 1);
+		dfiler.write(f, data, 0, data.length);
 	}
 	
 	private String ReadTest(DFileID f)
 	{
 		byte[] read = new byte[100];
-		int bytes = dfiler.read(f, read, 0, 100);
-		Print("Read bytes", Integer.toString(bytes));
-		return new String(read);
+		int bytes = dfiler.read(f, read, 0, 50);
+		//Print("Read bytes", Integer.toString(bytes));
+		return new String(read).trim();
 	}
 	
 	private String ReadTestPartial(DFileID f, int index, int count)
@@ -49,30 +49,31 @@ public class TestClient implements Runnable{
 		byte[] read = new byte[100];
 		int bytes = dfiler.read(f, read, 0, 100);	
 		dfiler.read(f, read, index, count);
-		Print("Read bytes", Integer.toString(bytes));
-		return new String(read);
+		//Print("Read bytes", Integer.toString(bytes));
+		return new String(read).trim();
 	}
 
 	@Override
 	public void run() {	
 		Print("Started", "Running");
-		//WriteTest(conc, "INTIAL");
-		//Print("Read", ReadTest(conc));
-		//System.out.println(ReadTest(conc));
+		WriteTest(conc, "INTIAL");
+		Print("Read", ReadTest(conc));
+		WriteTest(conc, "INTIALS");
+		System.out.println(ReadTest(conc));
 		DFileID nf = dfiler.createDFile();
 		Print("Created DFile", Integer.toString(nf.get_dFID()));		
-		WriteTest(nf, "TEST TWO");
 		Print("Writing", "Test Two");
+		WriteTest(nf, "TEST TWO");		
 		Print("Read", ReadTest(nf));
 		
 		WriteTest(nf, "TEST THREE");
-		Print("Read", ReadTestPartial(nf, 6, 4)); // Should be TEST TEST		
+		Print("Read", ReadTestPartial(nf, 5, 4)); // Should be TEST TEST		
 		
 		// Test concurrent access 3 times
 		for (int i = 0; i < 3; i++)
 		{
 			Print("Read Concurrent" + i, ReadTest(conc));
-			WriteTest(conc, "SHUT DOWN"+ clientID);
+			WriteTest(conc, "SHUT DOWN "+ clientID);
 			Print("Read Concurrent" + i, ReadTest(conc));
 		}
 		
