@@ -75,8 +75,15 @@ public class DFS {
             // TODO Check that the block maps of all DFiles have a valid block number for every block in the DFile
             // TODO Check that no data block is listed for more than one DFile
         }
-        // TODO Build the list of DFiles on the disk by scanning the INode region
-        // TODO Build a list of all allocated and free blocks on the VirtualDisk
+        LoadDFileList();
+        for(int i=0; i<common.Constants.NUM_OF_BLOCKS; i++) {
+            if(_dFiles.keySet().contains(new DFileID(i))) {
+                _allocatedBlocks.add(i);
+            }
+            else {
+                _freeBlocks.add(i);
+            }
+        }
     }
     
     /**
