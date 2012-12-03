@@ -20,7 +20,7 @@ public class VirtualDisk implements Runnable {
     /**
      * VirtualDisk Constructors
      */
-    public VirtualDisk (String volName, boolean format) 
+    public VirtualDisk (String volName, boolean format)
             throws FileNotFoundException, IOException {
 
         _volName = volName;
@@ -61,44 +61,40 @@ public class VirtualDisk implements Runnable {
      * volume.
      * -- operation is either READ or WRITE
      */
-    public void startRequest(DBuffer buf, Constants.DiskOperationType operation) throws IllegalArgumentException,
-	IOException
-	{
-		synchronized (requestQueue) {
-			// Create the new Item
-			RequestObject ro = new RequestObject(buf, operation);
-			// Add it to the queue
-			requestQueue.add(ro);
-			// Let the VirtualDisk know that there is something in the queue.
-			requestQueue.notifyAll();
-		}				
-	}
+    public void startRequest (DBuffer buf, Constants.DiskOperationType operation)
+            throws IllegalArgumentException, IOException {
+        synchronized (requestQueue) {
+            // Create the new Item
+            RequestObject ro = new RequestObject(buf, operation);
+            // Add it to the queue
+            requestQueue.add(ro);
+            // Let the VirtualDisk know that there is something in the queue.
+            requestQueue.notifyAll();
+        }
+    }
 
-    private void processQueue()
-	{	
-		RequestObject ro;
-		synchronized (requestQueue) {
-			ro = requestQueue.poll();
-		}		
-		
-		if (ro == null)
-			return;
-		try {
-			if (ro.operation == DiskOperationType.READ)
-			{
-				readBlock(ro.dBuffer);
-			}
-			else
-			{
-				writeBlock(ro.dBuffer);
-			}
-		} catch (IOException e) {				
-			e.printStackTrace();
-		}			
-		finally {
-			ro.dBuffer.ioComplete();
-		}
-	}
+    private void processQueue () {
+        RequestObject ro;
+        synchronized (requestQueue) {
+            ro = requestQueue.poll();
+        }
+
+        if (ro == null) return;
+        try {
+            if (ro.operation == DiskOperationType.READ) {
+                readBlock(ro.dBuffer);
+            }
+            else {
+                writeBlock(ro.dBuffer);
+            }
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+        }
+        finally {
+            ro.dBuffer.ioComplete();
+        }
+    }
 
     /**
      * Clear the contents of the disk by writing 0s to it
@@ -150,21 +146,21 @@ public class VirtualDisk implements Runnable {
         _file.seek(seekLen);
         _file.write(buf.getBuffer(), 0, Constants.BLOCK_SIZE);
     }
-    
+
     @Override
-	public void run() {
-		// Wait until there are items in the queue and then process them.
-		while (true)
-		{
-			synchronized (requestQueue) {
-				try {
-					requestQueue.wait();
-					processQueue();
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
-		}
-	}
+    public void run () {
+        // Wait until there are items in the queue and then process them.
+        while (true) {
+            synchronized (requestQueue) {
+                try {
+                    requestQueue.wait();
+                    processQueue();
+                }
+                catch (InterruptedException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
 }

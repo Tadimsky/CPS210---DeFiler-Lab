@@ -41,7 +41,7 @@ public class DBuffer {
         }
         catch (IOException e) {
             e.printStackTrace();
-        }        
+        }
     }
 
     /**
@@ -132,7 +132,7 @@ public class DBuffer {
      * @param count reads begin at offset 0 and move at most count bytes. Don't
      *        make this bigger than the block size.
      */
-    public synchronized int read (byte[] ubuffer, int startOffset, int count) {        
+    public synchronized int read (byte[] ubuffer, int startOffset, int count) {
 
         // make sure startOffset does not exceed bounds
         if (startOffset < 0 || startOffset >= ubuffer.length) return -1;
@@ -147,7 +147,7 @@ public class DBuffer {
         for (int i = startOffset; i < startOffset + numcopy; i++) {
             // if we hit the end of the file
             if (_buffer[i - startOffset] == 0xffffffff) {
-                //ubuffer[i] = '';
+                // ubuffer[i] = '';
                 return i;
             }
             else {
@@ -177,23 +177,21 @@ public class DBuffer {
 
         // make sure does not exceed bounds
         if (startOffset + numcopy > ubuffer.length) return -1;
-        
-        if (ubuffer.length > _buffer.length)
-        {
-        	ubuffer = new byte[_buffer.length];
+
+        if (ubuffer.length > _buffer.length) {
+            ubuffer = new byte[_buffer.length];
         }
 
         // Mark this DBuffer as dirty as we've written data to it.
         _state = DBufferState.DIRTY;
 
         // copy every byte from the ubuffer to the _buffer
-        for (int i = startOffset; i < startOffset + numcopy; i++) { 
-           _buffer[i - startOffset] = ubuffer[i];            
+        for (int i = startOffset; i < startOffset + numcopy; i++) {
+            _buffer[i - startOffset] = ubuffer[i];
         }
-        if (count < Constants.BLOCK_SIZE)
-        {
-        	_buffer[startOffset + numcopy] = 0xffffffff;
-        }        
+        if (count < Constants.BLOCK_SIZE) {
+            _buffer[startOffset + numcopy] = 0xffffffff;
+        }
         return numcopy;
     }
 

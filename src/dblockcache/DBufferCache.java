@@ -24,12 +24,11 @@ public class DBufferCache {
      * @param BlockID name of block
      */
     public DBuffer getBlock (int blockID) {
-        if(_bufferList.getSize() >= _cacheSize) {
+        if (_bufferList.getSize() >= _cacheSize) {
             _bufferList = _bufferList.getLRUNode();
         }
-        if(_bufferList != null && _bufferList.contains(blockID)) {
-            return _bufferList.get(blockID).getBuffer();
-        }
+        if (_bufferList != null && _bufferList.contains(blockID)) { return _bufferList
+                .get(blockID).getBuffer(); }
         DBuffer buf = new DBuffer(common.Constants.BLOCK_SIZE, blockID, _disk);
         buf.setBusy(true);
         _bufferList.addNode(buf);

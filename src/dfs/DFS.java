@@ -4,15 +4,10 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
-
-import com.sun.xml.internal.bind.v2.runtime.reflect.opt.Const;
-
 import virtualdisk.VirtualDisk;
 import common.Constants;
 import dblockcache.DBuffer;
@@ -21,15 +16,15 @@ import dblockcache.DBufferCache;
 
 public class DFS {
 
-    private Map<DFileID, DFile> _dFiles;
+    private Map<Integer, DFile> _dFiles;
     private SortedSet<Integer> _allocatedBlocks;
     private SortedSet<Integer> _freeBlocks;
 
     DBufferCache _cache;
 
     public DFS () {
-        _dFiles = new HashMap<DFileID, DFile>();
-        
+        _dFiles = new HashMap<Integer, DFile>();
+
         _allocatedBlocks = new TreeSet<Integer>();
         _freeBlocks = new TreeSet<Integer>();
 
@@ -61,8 +56,7 @@ public class DFS {
             }
 
             DFile dfile = INode.createDFile(block);
-            if (dfile != null)
-            	_dFiles.put(dfile.get_dFID(), dfile);
+            if (dfile != null) _dFiles.put(dfile.get_dFID().get_dFID(), dfile);
         }
     }
 
@@ -76,32 +70,29 @@ public class DFS {
      * Build the list of DFiles on the disk by scanning the INode region
      * Build a list of all allocated and free blocks on the VirtualDisk
      */
-    public void init () {        
+    public void init () {
         LoadDFileList();
-        for (DFileID id : _dFiles.keySet()) {
+        for (int id : _dFiles.keySet()) {
             DFile d = _dFiles.get(id);
             // TODO Check that each DFile has exactly one INode
-            if (d.getSize() > common.Constants.MAX_FILE_BLOCKS * Constants.BLOCK_SIZE) return;
+            if (d.getSize() > common.Constants.MAX_FILE_BLOCKS
+                    * Constants.BLOCK_SIZE) return;
             // TODO Check that the block maps of all DFiles have a valid block
             // number for every block in the DFile
             // TODO Check that no data block is listed for more than one DFile
         }
-        
-        for (DFile file : _dFiles.values())
-    	{
-    		for (int j = 0; j < Constants.NUM_OF_BLOCKS; j++)
-    		{
-    			int blockid = file.getMappedBlock(j);
-    			if (blockid == -1)
-    				break;
-    			_allocatedBlocks.add(blockid);
-    		}
-    	}
-        
+
+        for (DFile file : _dFiles.values()) {
+            for (int j = 0; j < Constants.NUM_OF_BLOCKS; j++) {
+                int blockid = file.getMappedBlock(j);
+                if (blockid == -1) break;
+                _allocatedBlocks.add(blockid);
+            }
+        }
+
         for (int i = Constants.MAX_FILES + 1; i < common.Constants.NUM_OF_BLOCKS; i++) {
-        	if (!_allocatedBlocks.contains(i))
-        	{
-        		_freeBlocks.add(i);
+            if (!_allocatedBlocks.contains(i)) {
+                _freeBlocks.add(i);
             }
         }
     }
@@ -114,31 +105,29 @@ public class DFS {
         _allocatedBlocks.add(_freeBlocks.first());
         _freeBlocks.remove(_freeBlocks.first());
         int dFID = 0;
-        DFileID fID = new DFileID(dFID);
-        while (_dFiles.containsKey(fID))
+        while (_dFiles.containsKey(dFID))
             dFID++;
-        fID.set_dFID(dFID);
-        DFile newFile = new DFile(fID);        
+        DFile newFile = new DFile(new DFileID(dFID));
         newFile.MapBlock(0, fileStart);
-        _dFiles.put(fID, newFile);
-        
-        return fID;
+        _dFiles.put(dFID, newFile);
+
+        return new DFileID(dFID);
     }
 
     /**
      * Destroys the DFile named by the DFileID
      * 
      * @param dFID names the DFile
-     * @throws Exception 
+     * @throws Exception
      */
     public void destroyFile (DFileID dFID) throws Exception {
-        for (int i = 0; i < _dFiles.get(dFID).getNumBlocks(); i++) {
-            int block = _dFiles.get(dFID).getMappedBlock(i);
+        for (int i = 0; i < _dFiles.get(dFID.get_dFID()).getNumBlocks(); i++) {
+            int block = _dFiles.get(dFID.get_dFID()).getMappedBlock(i);
             _allocatedBlocks.remove(block);
             _freeBlocks.add(block);
         }
-        _dFiles.get(dFID).setSize(0);
-        _dFiles.remove(dFID);
+        _dFiles.get(dFID.get_dFID()).setSize(0);
+        _dFiles.remove(dFID.get_dFID());
     }
 
     /**
@@ -150,24 +139,23 @@ public class DFS {
      * @param count at most count bytes are transferred
      */
     public int read (DFileID dFID, byte[] ubuffer, int startOffset, int count) {
-    	DFile file = _dFiles.get(dFID); 
-    	int nb = file.getNumBlocks();
-    	int s = startOffset;
-    	int done = count;
-    	
-    	for (int i = 0; i < nb; i++)
-    	{
-    		DBuffer d = _cache.getBlock(file.getMappedBlock(i));
-    		if (!d.checkValid()){
-    			d.startFetch();
-            	d.waitValid();
+        DFile file = _dFiles.get(dFID.get_dFID());
+        int nb = file.getNumBlocks();
+        int s = startOffset;
+        int done = count;
+
+        for (int i = 0; i < nb; i++) {
+            DBuffer d = _cache.getBlock(file.getMappedBlock(i));
+            if (!d.checkValid()) {
+                d.startFetch();
+                d.waitValid();
             }
-    		
-    		int read = d.read(ubuffer, s, done);
-    		done -= read;
-    		s += read;
-    	}
-    	return count;        
+
+            int read = d.read(ubuffer, s, done);
+            done -= read;
+            s += read;
+        }
+        return count;
     }
 
     /**
@@ -180,56 +168,54 @@ public class DFS {
      * @return
      */
     public int write (DFileID dFID, byte[] ubuffer, int startOffset, int count) {
-    	DFile file = _dFiles.get(dFID);
-    	int delta = file.changeinBlocks(count);
-    	if (delta < 0)
-    	{
-    		// free blocks
-    		delta *= -1;    		
-    		for (int i = file.getNumBlocks(); i > file.getNumBlocks() - delta; i--)
-    		{
-    			// free these blocks
-    			_freeBlocks.add(file.getMappedBlock(i-1));
-    			_allocatedBlocks.remove(file.getMappedBlock(i-1));
-    		}
-    	}
-    	else
-    	{
-    		// Adding blocks
-    		for (int i = file.getNumBlocks(); i < file.getNumBlocks() + delta; i++)
-    		{
-    			int newblock = _freeBlocks.first();
-    			_freeBlocks.remove(newblock);
-    			_allocatedBlocks.add(newblock);
-    			
-    			file.MapBlock(i, newblock);    			
-    		}
-    	}
-    	// Set the new size, make sure enough blocks were added
-    	try {
-			file.setSize(count);
-		} catch (Exception e) {
-			// Not enough blocks allocated
-			e.printStackTrace();
-		}
-    	
-    	int nb = file.getNumBlocks();
-    	int s = startOffset;
-    	int done = count;
-    	
-    	for (int i = 0; i < nb; i++)
-    	{
-    		DBuffer d = _cache.getBlock(file.getMappedBlock(i));
-    		if (!d.checkValid()){
-    			d.startFetch();
-            	d.waitValid();
+        DFile file = _dFiles.get(dFID.get_dFID());
+        int delta = file.changeinBlocks(count);
+        if (delta < 0) {
+            // free blocks
+            delta *= -1;
+            for (int i = file.getNumBlocks(); i > file.getNumBlocks() - delta; i--) {
+                // free these blocks
+                _freeBlocks.add(file.getMappedBlock(i - 1));
+                _allocatedBlocks.remove(file.getMappedBlock(i - 1));
             }
-    		
-    		int wrote = d.write(ubuffer, s, done);
-    		done -= wrote;
-    		s += wrote;
-    	}
-    	             
+        }
+        else {
+            // Adding blocks
+            for (int i = file.getNumBlocks(); i < file.getNumBlocks() + delta; i++) {
+                if (_freeBlocks.size() > 0) {
+                    int newblock = _freeBlocks.first();
+                    _freeBlocks.remove(newblock);
+                    _allocatedBlocks.add(newblock);
+
+                    file.MapBlock(i, newblock);
+                }
+            }
+        }
+        // Set the new size, make sure enough blocks were added
+        try {
+            file.setSize(count);
+        }
+        catch (Exception e) {
+            // Not enough blocks allocated
+            e.printStackTrace();
+        }
+
+        int nb = file.getNumBlocks();
+        int s = startOffset;
+        int done = count;
+
+        for (int i = 0; i < nb; i++) {
+            DBuffer d = _cache.getBlock(file.getMappedBlock(i));
+            if (!d.checkValid()) {
+                d.startFetch();
+                d.waitValid();
+            }
+
+            int wrote = d.write(ubuffer, s, done);
+            done -= wrote;
+            s += wrote;
+        }
+
         return count;
     }
 
@@ -238,7 +224,9 @@ public class DFS {
      */
     public List<DFileID> listAllDFiles () {
         List<DFileID> fileList = new ArrayList<DFileID>();
-        fileList.addAll(_dFiles.keySet());
+        for (int i : _dFiles.keySet()) {
+            fileList.add(new DFileID(i));
+        }
         return fileList;
     }
 
