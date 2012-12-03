@@ -46,8 +46,9 @@ public class TestClient implements Runnable{
 	
 	private String ReadTestPartial(DFileID f, int index, int count)
 	{
-		byte[] read = new byte[count];
-		int bytes = dfiler.read(f, read, index, count);
+		byte[] read = new byte[100];
+		int bytes = dfiler.read(f, read, 0, 100);	
+		dfiler.read(f, read, index, count);
 		Print("Read bytes", Integer.toString(bytes));
 		return new String(read);
 	}
@@ -55,7 +56,7 @@ public class TestClient implements Runnable{
 	@Override
 	public void run() {
 		WriteTest(conc, "INTIAL");
-		ReadTest(conc);		
+		Print("Read", ReadTest(conc));		
 		synchronized (this) {
 			// Wait for a bit
 			try {
@@ -73,8 +74,17 @@ public class TestClient implements Runnable{
 		Print("Read", ReadTest(nf));
 		
 		WriteTest(nf, "TEST THREE");
-		Print("Read", ReadTestPartial(nf, 6, 4)); // Should be Test
+		Print("Read", ReadTestPartial(nf, 6, 4)); // Should be TEST TEST		
 		
+		// Test concurrent access 3 times
+		for (int i = 0; i < 3; i++)
+		{
+			Print("Read Concurrent" + i, ReadTest(conc));
+			WriteTest(conc, "SHUT DOWN"+ clientID);
+			Print("Read Concurrent" + i, ReadTest(conc));
+		}
+		
+		// Sync files to disk
 		dfiler.sync();
 	}
 	
