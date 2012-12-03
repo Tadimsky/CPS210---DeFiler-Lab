@@ -70,8 +70,7 @@ public class TestClient implements Runnable {
             Print("Read Concurrent" + i, ReadTest(conc));
         }
 
-        // Sync files to disk
-        dfiler.sync();
+        
     }
 
     public static void main (String[] args) {
@@ -86,5 +85,7 @@ public class TestClient implements Runnable {
             Thread f = new Thread(tc);
             f.start();
         }
+        // Sync files to disk
+        dfiler.sync();
     }
 }
