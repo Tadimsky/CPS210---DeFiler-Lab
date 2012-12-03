@@ -155,6 +155,7 @@ public class SortedDBuffer {
     }
 
     public boolean contains(int blockID) {
+        if(_buffer == null) return false;
         if(_buffer.getBlockID() == blockID) {
             return true;
         }
