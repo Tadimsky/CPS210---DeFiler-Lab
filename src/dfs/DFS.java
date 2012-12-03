@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
+import java.util.TreeSet;
 import virtualdisk.VirtualDisk;
 import common.Constants;
 import dblockcache.DBuffer;
@@ -25,6 +26,9 @@ public class DFS {
 
     public DFS () {
         _dFiles = new HashMap<DFileID, DFile>();
+        
+        _allocatedBlocks = new TreeSet<Integer>();
+        _freeBlocks = new TreeSet<Integer>();
 
         // Cache Size
         try {
