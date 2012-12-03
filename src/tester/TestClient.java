@@ -82,6 +82,7 @@ public class TestClient implements Runnable{
 	{
 		
 		DFS dfiler = new DFS();
+		dfiler.init();
 		DFileID file = dfiler.createDFile();
 		// Run NUM_WORKERS threads 
 		for (int i = 0; i < NUM_WORKERS; i++)

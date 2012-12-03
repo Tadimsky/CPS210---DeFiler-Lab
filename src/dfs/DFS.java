@@ -3,8 +3,10 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.SortedSet;
 import virtualdisk.VirtualDisk;
 
@@ -68,6 +70,7 @@ public class DFS {
      * Build a list of all allocated and free blocks on the VirtualDisk
      */
     public void init() {
+        Set<Integer> usedBlocks = new HashSet<Integer>();
         for(DFileID id : _dFiles.keySet()) {
             DFile d = _dFiles.get(id);
             // TODO Check that each DFile has exactly one INode
