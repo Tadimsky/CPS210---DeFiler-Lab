@@ -11,7 +11,7 @@ NetId2:
 # Time spent
 ###############
 
- hours
+8 hours
 
 ####################################
 # Implementation details
@@ -32,7 +32,7 @@ However, a pdf is acceptable. No other forms are permitted.
 In case of lab is limited in some functionality, you should provide
 the details to maximize your partial credit.
 
-
+See design document pdf (attached).
 
 
 ####################################
