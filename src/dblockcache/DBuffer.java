@@ -42,6 +42,7 @@ public class DBuffer {
         catch (IOException e) {
             e.printStackTrace();
         }
+        _isvalid = true;
     }
 
     /**

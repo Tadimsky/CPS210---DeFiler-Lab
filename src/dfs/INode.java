@@ -33,7 +33,7 @@ public class INode {
 			int size = dis.readInt();
 			
 			// The rest of the block contains the block map			
-			int[] blockmap = new int[Constants.NUM_OF_BLOCKS];
+			int[] blockmap = new int[Constants.BLOCK_SIZE / 4 - 2];
 			for (int i = 0; i < blockmap.length; i++)
 			{
 				// read the next index of the block
