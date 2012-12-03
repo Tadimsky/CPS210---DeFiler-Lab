@@ -10,6 +10,8 @@ public class DBufferCache {
 
     public DBufferCache (int cachesize, VirtualDisk vD) {
         _disk = vD;
+        Thread virtualDisk = new Thread(_disk);
+        virtualDisk.start();
         _cacheSize = cachesize;
         _bufferList = new SortedDBuffer();
     }
