@@ -154,4 +154,25 @@ public class SortedDBuffer {
         return _size;
     }
 
+    public boolean contains(int blockID) {
+        if(_buffer.getBlockID() == blockID) {
+            return true;
+        }
+        if(_left == null && _right == null) return false;
+        if(_left == null) return _right.contains(blockID);
+        if(_right == null) return _left.contains(blockID);
+        return _left.contains(blockID) || _right.contains(blockID);
+    }
+    
+    public SortedDBuffer get(int blockID) {
+        if(_buffer.getBlockID() == blockID) {
+            return this;
+        }
+        if(_left == null && _right == null) return null;
+        if(_left == null) return _right.get(blockID);
+        if(_right == null) return _left.get(blockID);
+        if(_left.get(blockID) != null) return _left.get(blockID);
+        if(_right.get(blockID) != null) return _right.get(blockID);
+        return null;
+    }
 }
