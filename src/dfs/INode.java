@@ -62,7 +62,7 @@ public class INode {
 			dos.writeInt(file.get_dFID().get_dFID());
 			dos.writeInt(file.getSize());			
 			
-			for (int i = 0; i < Constants.NUM_OF_BLOCKS; i++)
+			for (int i = 0; i < Constants.MAX_FILE_BLOCKS; i++)
 			{
 				dos.writeInt(file.getMappedBlock(i));
 			}			
