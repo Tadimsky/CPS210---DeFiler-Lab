@@ -41,8 +41,7 @@ public class DBuffer {
         }
         catch (IOException e) {
             e.printStackTrace();
-        }
-        _isvalid = true;
+        }        
     }
 
     /**
@@ -195,8 +194,7 @@ public class DBuffer {
             else {
                 // continue the read
                 _buffer[i - startOffset] = ubuffer[i];
-            }
-            _buffer[i - startOffset] = ubuffer[i];
+            }            
         }
         return numcopy;
     }

@@ -8,7 +8,7 @@ import dfs.DFileID;
 
 
 public class TestClient implements Runnable{
-	private static final int NUM_WORKERS = 10;
+	private static final int NUM_WORKERS = 1;
 	
 	DFS dfiler;
 	DFileID conc;
@@ -33,7 +33,7 @@ public class TestClient implements Runnable{
 	private void WriteTest(DFileID f, String t)
 	{
 		byte[] data = t.getBytes();
-		dfiler.write(f, data, 0, data.length);
+		dfiler.write(f, data, 0, data.length - 1);
 	}
 	
 	private String ReadTest(DFileID f)
@@ -54,12 +54,11 @@ public class TestClient implements Runnable{
 	}
 
 	@Override
-	public void run() {
-		System.out.println("BOO");
-		WriteTest(conc, "INTIAL");
-		Print("Read", ReadTest(conc));		
-		
-		System.out.println(ReadTest(conc));
+	public void run() {	
+		Print("Started", "Running");
+		//WriteTest(conc, "INTIAL");
+		//Print("Read", ReadTest(conc));
+		//System.out.println(ReadTest(conc));
 		DFileID nf = dfiler.createDFile();
 		Print("Created DFile", Integer.toString(nf.get_dFID()));		
 		WriteTest(nf, "TEST TWO");
@@ -82,10 +81,11 @@ public class TestClient implements Runnable{
 	}
 	
 	public static void main(String[] args) 
-	{		
-		System.out.println("BOO");
+	{	
+		System.out.println("Initializing DFS");
 		DFS dfiler = new DFS();
 		dfiler.init();
+		System.out.println("Initialized");
 		DFileID file = dfiler.createDFile();
 		// Run NUM_WORKERS threads 
 		for (int i = 0; i < NUM_WORKERS; i++)

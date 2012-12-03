@@ -31,6 +31,8 @@ public class INode {
 			DFileID dfid = new DFileID(fid);
 			// Read the Size from the INode
 			int size = dis.readInt();
+			if (size == 0)
+				return null;
 			
 			// The rest of the block contains the block map			
 			int[] blockmap = new int[Constants.MAX_FILE_BLOCKS];

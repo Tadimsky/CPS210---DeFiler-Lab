@@ -58,7 +58,8 @@ public class DFS {
             }
 
             DFile dfile = INode.createDFile(block);
-            _dFiles.put(dfile.get_dFID(), dfile);
+            if (dfile != null)
+            	_dFiles.put(dfile.get_dFID(), dfile);
         }
     }
 
@@ -72,8 +73,8 @@ public class DFS {
      * Build the list of DFiles on the disk by scanning the INode region
      * Build a list of all allocated and free blocks on the VirtualDisk
      */
-    public void init () {
-        Set<Integer> usedBlocks = new HashSet<Integer>();
+    public void init () {        
+        LoadDFileList();
         for (DFileID id : _dFiles.keySet()) {
             DFile d = _dFiles.get(id);
             // TODO Check that each DFile has exactly one INode
@@ -82,7 +83,7 @@ public class DFS {
             // number for every block in the DFile
             // TODO Check that no data block is listed for more than one DFile
         }
-        LoadDFileList();
+        
         for (int i = 0; i < common.Constants.NUM_OF_BLOCKS; i++) {
             if (_dFiles.keySet().contains(new DFileID(i))) {
                 _allocatedBlocks.add(i);
@@ -135,9 +136,24 @@ public class DFS {
      * @param count at most count bytes are transferred
      */
     public int read (DFileID dFID, byte[] ubuffer, int startOffset, int count) {
-        DBuffer d = _cache.getBlock(dFID.get_dFID());
-        d.read(ubuffer, startOffset, count);
-        return count;
+    	DFile file = _dFiles.get(dFID); 
+    	int nb = file.getNumBlocks();
+    	int s = startOffset;
+    	int done = count;
+    	
+    	for (int i = 0; i < nb; i++)
+    	{
+    		DBuffer d = _cache.getBlock(file.getMappedBlock(i));
+    		if (!d.checkValid()){
+    			d.startFetch();
+            	d.waitValid();
+            }
+    		
+    		int read = d.read(ubuffer, s, done);
+    		done -= read;
+    		s += read;
+    	}
+    	return count;        
     }
 
     /**
@@ -150,8 +166,56 @@ public class DFS {
      * @return
      */
     public int write (DFileID dFID, byte[] ubuffer, int startOffset, int count) {
-        DBuffer d = _cache.getBlock(dFID.get_dFID());
-        d.write(ubuffer, startOffset, count);
+    	DFile file = _dFiles.get(dFID);
+    	int delta = file.changeinBlocks(count);
+    	if (delta < 0)
+    	{
+    		// free blocks
+    		delta *= -1;    		
+    		for (int i = file.getNumBlocks(); i > file.getNumBlocks() - delta; i--)
+    		{
+    			// free these blocks
+    			_freeBlocks.add(file.getMappedBlock(i-1));
+    			_allocatedBlocks.remove(file.getMappedBlock(i-1));
+    		}
+    	}
+    	else
+    	{
+    		// Adding blocks
+    		for (int i = file.getNumBlocks(); i < file.getNumBlocks() + delta; i++)
+    		{
+    			int newblock = _freeBlocks.first();
+    			_freeBlocks.remove(newblock);
+    			_allocatedBlocks.add(newblock);
+    			
+    			file.MapBlock(i, newblock);    			
+    		}
+    	}
+    	// Set the new size, make sure enough blocks were added
+    	try {
+			file.setSize(count);
+		} catch (Exception e) {
+			// Not enough blocks allocated
+			e.printStackTrace();
+		}
+    	
+    	int nb = file.getNumBlocks();
+    	int s = startOffset;
+    	int done = count;
+    	
+    	for (int i = 0; i < nb; i++)
+    	{
+    		DBuffer d = _cache.getBlock(file.getMappedBlock(i));
+    		if (!d.checkValid()){
+    			d.startFetch();
+            	d.waitValid();
+            }
+    		
+    		int wrote = d.write(ubuffer, s, done);
+    		done -= wrote;
+    		s += wrote;
+    	}
+    	             
         return count;
     }
 
