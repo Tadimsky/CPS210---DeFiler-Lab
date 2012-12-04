@@ -19,6 +19,8 @@ public class DFS {
     private Map<Integer, DFile> _dFiles;
     private SortedSet<Integer> _allocatedBlocks;
     private SortedSet<Integer> _freeBlocks;
+    
+    
 
     DBufferCache _cache;
 
@@ -38,6 +40,8 @@ public class DFS {
         catch (IOException e) {
             e.printStackTrace();
         }
+        
+        
     }
 
     /**
@@ -144,6 +148,7 @@ public class DFS {
      */
     public int read (DFileID dFID, byte[] ubuffer, int startOffset, int count) {
         DFile file = _dFiles.get(dFID.get_dFID());
+        file.lockRead();
         int nb = file.getNumBlocks();
         int s = startOffset;
         int done = count;
@@ -159,6 +164,7 @@ public class DFS {
             done -= read;
             s += read;
         }
+        file.unlockRead();
         return count;
     }
 
@@ -173,6 +179,7 @@ public class DFS {
      */
     public synchronized int write (DFileID dFID, byte[] ubuffer, int startOffset, int count) {
         DFile file = _dFiles.get(dFID.get_dFID());
+        file.lockWrite();
         int delta = file.changeinBlocks(count);
         if (delta < 0) {
             // free blocks
@@ -219,7 +226,7 @@ public class DFS {
             done -= wrote;
             s += wrote;
         }
-
+        file.unlockWrite();
         return count;
     }
 

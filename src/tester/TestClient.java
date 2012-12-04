@@ -9,7 +9,7 @@ public class TestClient implements Runnable {
 
     DFS dfiler;
     DFileID conc;
-    int clientID;
+    int clientID;    
 
     /**
      * @param args
@@ -30,6 +30,23 @@ public class TestClient implements Runnable {
     private void WriteTest (DFileID f, String t) {
         byte[] data = t.getBytes();
         dfiler.write(f, data, 0, data.length);
+    }
+    
+    private void WriteLong(DFileID f)
+    {
+    	byte[] data = new byte[2048];
+    	for (int i = 0; i < 2048; i++)
+    	{
+    		data[i] = (byte) ('a' + (i%26));
+    	}
+    	dfiler.write(f, data, 0, 2048);
+    }
+    
+    private String ReadLong(DFileID f)
+    {
+    	byte[] data = new byte[2048];
+    	dfiler.read(f, data, 0, 2048);
+    	return new String(data).trim();
     }
 
     private String ReadTest (DFileID f) {
@@ -67,10 +84,11 @@ public class TestClient implements Runnable {
         for (int i = 0; i < 3; i++) {
             Print("Read Concurrent" + i, ReadTest(conc));
             WriteTest(conc, "SHUT DOWN " + clientID);
-            Print("Read Concurrent" + i, ReadTest(conc));
-        }
-
+            Print("Read Concurrent " + i, ReadTest(conc));
+        }    
         
+        WriteLong(nf);
+        Print("Read Long", ReadLong(nf));
     }
 
     public static void main (String[] args) {

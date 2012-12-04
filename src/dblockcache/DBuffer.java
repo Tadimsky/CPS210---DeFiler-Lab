@@ -178,9 +178,6 @@ public class DBuffer {
         // make sure does not exceed bounds
         if (startOffset + numcopy > ubuffer.length) return -1;
 
-        if (ubuffer.length > _buffer.length) {
-            ubuffer = new byte[_buffer.length];
-        }
 
         // Mark this DBuffer as dirty as we've written data to it.
         _state = DBufferState.DIRTY;
