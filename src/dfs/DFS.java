@@ -171,7 +171,7 @@ public class DFS {
      * @param count a most count bytes are transferred
      * @return
      */
-    public int write (DFileID dFID, byte[] ubuffer, int startOffset, int count) {
+    public synchronized int write (DFileID dFID, byte[] ubuffer, int startOffset, int count) {
         DFile file = _dFiles.get(dFID.get_dFID());
         int delta = file.changeinBlocks(count);
         if (delta < 0) {
