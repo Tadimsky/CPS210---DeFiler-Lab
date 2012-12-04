@@ -47,7 +47,7 @@ public class DBufferCache {
     /**
      * Write back all dirty blocks to the volume, and wait for completion.
      */
-    public void sync () {
+    public synchronized void sync () {
         _bufferList.sync(_disk);
     }
 }
