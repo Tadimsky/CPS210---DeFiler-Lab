@@ -1,5 +1,7 @@
 package tester;
 
+import java.util.ArrayList;
+
 import dfs.DFS;
 import dfs.DFileID;
 
@@ -10,6 +12,7 @@ public class TestClient implements Runnable {
     DFS dfiler;
     DFileID conc;
     int clientID;    
+    
 
     /**
      * @param args
@@ -63,47 +66,84 @@ public class TestClient implements Runnable {
         // Print("Read bytes", Integer.toString(bytes));
         return new String(read).trim();
     }
-
-    @Override
-    public void run () {
-        Print("Started", "Running");
+    
+    private void extTest()
+    {
+    	Print("Started", "Running");
+        
+        Print("Write INITIAL", "Concurrent " + conc.get_dFID());
         WriteTest(conc, "INTIAL");
-        Print("Read", ReadTest(conc));
+        Print("Read Concurrent", ReadTest(conc));
+        Print("Write INITIALS", "Concurrent " + conc.get_dFID());
         WriteTest(conc, "INTIALS");
-        System.out.println(ReadTest(conc));
+        
+        
+        
         DFileID nf = dfiler.createDFile();
+        
         Print("Created DFile", Integer.toString(nf.get_dFID()));
         Print("Writing", "Test Two");
         WriteTest(nf, "TEST TWO");
         Print("Read", ReadTest(nf));
 
-        WriteTest(nf, "TEST THREE");
+        WriteTest(nf, "TEST PART");
         Print("Read", ReadTestPartial(nf, 5, 4)); // Should be TEST TEST
 
         // Test concurrent access 3 times
         for (int i = 0; i < 3; i++) {
-            Print("Read Concurrent" + i, ReadTest(conc));
-            WriteTest(conc, "SHUT DOWN " + clientID);
+            Print("Write", "Concurrent " + i);
+            WriteTest(conc, "SHUT DOWN " + clientID + "" + i);
             Print("Read Concurrent " + i, ReadTest(conc));
         }    
         
         WriteLong(nf);
         Print("Read Long", ReadLong(nf));
+        
+        WriteLong(conc);
+        Print("Read Long Concurrent", ReadLong(conc));        
+    }
+    
+    private void concTest()
+    {
+    	DFileID file = new DFileID(clientID);
+    	//DFileID file = dfiler.createDFile();
+    	WriteTest(file, "CLIENT " + clientID + 1);    	
+
+    	Print("Read", ReadTest(file));
+    	
     }
 
-    public static void main (String[] args) {
+    @Override
+    public void run () {
+        //concTest();
+        extTest();
+        dfiler.sync();
+    }
+
+    public static void main (String[] args) throws Exception {
         System.out.println("Initializing DFS");
         DFS dfiler = new DFS();
         dfiler.init();
+        dfiler.createDFile();
         System.out.println("Initialized");
-        DFileID file = dfiler.createDFile();
+       //DFileID file = dfiler.createDFile();
+        DFileID file = new DFileID(4);       
+        
+        
+        ArrayList<Thread> clients = new ArrayList<Thread>();
         // Run NUM_WORKERS threads
-        for (int i = 0; i < NUM_WORKERS; i++) {
-            TestClient tc = new TestClient(dfiler, file, i);
+        for (int i = 0; i < NUM_WORKERS; i++) {        	
+            TestClient tc = new TestClient(dfiler, file, i);            
             Thread f = new Thread(tc);
+            clients.add(f);
             f.start();
         }
         // Sync files to disk
-        dfiler.sync();
+        for (Thread tc : clients)
+        {
+        	tc.join();
+        }
+        System.out.println("SHUTTING DOWN");
+        dfiler.shutdown();
     }
 }

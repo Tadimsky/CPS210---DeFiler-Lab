@@ -12,7 +12,7 @@ public class DBuffer {
     private byte[] _buffer;
     private int _blockid;
 
-    private Constants.DBufferState _state;
+    private Constants.DBufferState _state;      
     private boolean _busy;
     private boolean _isvalid;
     private VirtualDisk _disk;
@@ -23,7 +23,7 @@ public class DBuffer {
         _state = Constants.DBufferState.CLEAN;
         _busy = false;
         _isvalid = false;
-        _disk = d;
+        _disk = d;       
     }
 
     /**
@@ -59,10 +59,11 @@ public class DBuffer {
         catch (IOException e) {
             e.printStackTrace();
         }
-        // Data will be written to the disk - Clean
-        synchronized (_state) {
-            _state = DBufferState.CLEAN;
-            notifyAll();
+        
+        // Data will be written to the disk - Clean        
+        synchronized (this) {
+            _state = DBufferState.CLEAN;            
+            notifyAll();            
         }
     }
 
@@ -110,7 +111,7 @@ public class DBuffer {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             }
-        }
+        }        
         return false;
     }
 
@@ -155,6 +156,7 @@ public class DBuffer {
                 ubuffer[i] = _buffer[i - startOffset];
             }
         }
+        notifyAll();
         return numcopy;
     }
 
@@ -189,6 +191,7 @@ public class DBuffer {
         if (count < Constants.BLOCK_SIZE) {
             _buffer[startOffset + numcopy] = 0xffffffff;
         }
+        notifyAll();
         return numcopy;
     }
 

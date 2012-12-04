@@ -16,6 +16,7 @@ public class VirtualDisk implements Runnable {
     private String _volName;
     private RandomAccessFile _file;
     private int _maxVolSize;
+    private boolean running;
 
     /**
      * VirtualDisk Constructors
@@ -76,7 +77,7 @@ public class VirtualDisk implements Runnable {
     private void processQueue () {
         RequestObject ro;
         synchronized (requestQueue) {
-            ro = requestQueue.poll();
+            ro = requestQueue.poll();            
         }
 
         if (ro == null) return;
@@ -149,12 +150,16 @@ public class VirtualDisk implements Runnable {
 
     @Override
     public void run () {
+    	running = true;
         // Wait until there are items in the queue and then process them.
-        while (true) {
+        while (running) {
             synchronized (requestQueue) {
-                try {
+                try {                    
+                    while (!requestQueue.isEmpty())
+                    {
+                    	processQueue();
+                    }
                     requestQueue.wait();
-                    processQueue();
                 }
                 catch (InterruptedException e) {
                     // TODO Auto-generated catch block
@@ -163,4 +168,14 @@ public class VirtualDisk implements Runnable {
             }
         }
     }
+    
+    public void stopdisk()
+    {
+    	synchronized (requestQueue) {
+    		running = false;
+    		requestQueue.notifyAll();
+		}
+    }
+    
+    
 }

@@ -50,4 +50,9 @@ public class DBufferCache {
     public synchronized void sync () {
         _bufferList.sync(_disk);
     }
+    
+    public void shutdown()
+    {
+    	_disk.stopdisk();
+    }
 }
