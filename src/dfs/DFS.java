@@ -33,11 +33,9 @@ public class DFS {
             _cache = new DBufferCache(1024, new VirtualDisk());
         }
         catch (FileNotFoundException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
         catch (IOException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
     }
