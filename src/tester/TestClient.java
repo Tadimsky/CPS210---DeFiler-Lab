@@ -1,7 +1,6 @@
 package tester;
 
 import java.util.ArrayList;
-
 import dfs.DFS;
 import dfs.DFileID;
 
@@ -11,8 +10,7 @@ public class TestClient implements Runnable {
 
     DFS dfiler;
     DFileID conc;
-    int clientID;    
-    
+    int clientID;
 
     /**
      * @param args
@@ -34,22 +32,19 @@ public class TestClient implements Runnable {
         byte[] data = t.getBytes();
         dfiler.write(f, data, 0, data.length);
     }
-    
-    private void WriteLong(DFileID f)
-    {
-    	byte[] data = new byte[2048];
-    	for (int i = 0; i < 2048; i++)
-    	{
-    		data[i] = (byte) ('a' + (i%26));
-    	}
-    	dfiler.write(f, data, 0, 2048);
+
+    private void WriteLong (DFileID f) {
+        byte[] data = new byte[2048];
+        for (int i = 0; i < 2048; i++) {
+            data[i] = (byte) ('a' + (i % 26));
+        }
+        dfiler.write(f, data, 0, 2048);
     }
-    
-    private String ReadLong(DFileID f)
-    {
-    	byte[] data = new byte[2048];
-    	dfiler.read(f, data, 0, 2048);
-    	return new String(data).trim();
+
+    private String ReadLong (DFileID f) {
+        byte[] data = new byte[2048];
+        dfiler.read(f, data, 0, 2048);
+        return new String(data).trim();
     }
 
     private String ReadTest (DFileID f) {
@@ -66,21 +61,18 @@ public class TestClient implements Runnable {
         // Print("Read bytes", Integer.toString(bytes));
         return new String(read).trim();
     }
-    
-    private void extTest()
-    {
-    	Print("Started", "Running");
-        
+
+    private void extTest () {
+        Print("Started", "Running");
+
         Print("Write INITIAL", "Concurrent " + conc.get_dFID());
         WriteTest(conc, "INTIAL");
         Print("Read Concurrent", ReadTest(conc));
         Print("Write INITIALS", "Concurrent " + conc.get_dFID());
         WriteTest(conc, "INTIALS");
-        
-        
-        
+
         DFileID nf = dfiler.createDFile();
-        
+
         Print("Created DFile", Integer.toString(nf.get_dFID()));
         Print("Writing", "Test Two");
         WriteTest(nf, "TEST TWO");
@@ -94,28 +86,27 @@ public class TestClient implements Runnable {
             Print("Write", "Concurrent " + i);
             WriteTest(conc, "SHUT DOWN " + clientID + "" + i);
             Print("Read Concurrent " + i, ReadTest(conc));
-        }    
-        
+        }
+
         WriteLong(nf);
         Print("Read Long", ReadLong(nf));
-        
-        WriteLong(conc);
-        Print("Read Long Concurrent", ReadLong(conc));        
-    }
-    
-    private void concTest()
-    {
-    	DFileID file = new DFileID(clientID);
-    	//DFileID file = dfiler.createDFile();
-    	WriteTest(file, "CLIENT " + clientID + 1);    	
 
-    	Print("Read", ReadTest(file));
-    	
+        WriteLong(conc);
+        Print("Read Long Concurrent", ReadLong(conc));
+    }
+
+    private void concTest () {
+        DFileID file = new DFileID(clientID);
+        // DFileID file = dfiler.createDFile();
+        WriteTest(file, "CLIENT " + clientID + 1);
+
+        Print("Read", ReadTest(file));
+
     }
 
     @Override
     public void run () {
-        //concTest();
+        // concTest();
         extTest();
         dfiler.sync();
     }
@@ -126,22 +117,20 @@ public class TestClient implements Runnable {
         dfiler.init();
         dfiler.createDFile();
         System.out.println("Initialized");
-       //DFileID file = dfiler.createDFile();
-        DFileID file = new DFileID(4);       
-        
-        
+        // DFileID file = dfiler.createDFile();
+        DFileID file = new DFileID(4);
+
         ArrayList<Thread> clients = new ArrayList<Thread>();
         // Run NUM_WORKERS threads
-        for (int i = 0; i < NUM_WORKERS; i++) {        	
-            TestClient tc = new TestClient(dfiler, file, i);            
+        for (int i = 0; i < NUM_WORKERS; i++) {
+            TestClient tc = new TestClient(dfiler, file, i);
             Thread f = new Thread(tc);
             clients.add(f);
             f.start();
         }
         // Sync files to disk
-        for (Thread tc : clients)
-        {
-        	tc.join();
+        for (Thread tc : clients) {
+            tc.join();
         }
         System.out.println("SHUTTING DOWN");
         dfiler.shutdown();

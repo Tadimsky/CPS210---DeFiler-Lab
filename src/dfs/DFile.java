@@ -7,7 +7,7 @@ public class DFile {
     private int _size;
     private int[] _blockmap;
     private DFileID _dFID;
-    
+
     private int _readers;
     private int _writers;
     private int _waitWrite;
@@ -16,7 +16,7 @@ public class DFile {
         // NOTE: Fixed Block Map size
         _blockmap = new int[Constants.MAX_FILE_BLOCKS];
         _dFID = dFID;
-        
+
         _readers = 0;
         _writers = 0;
         _waitWrite = 0;
@@ -136,67 +136,63 @@ public class DFile {
     public void set_dFID (DFileID _dFID) {
         this._dFID = _dFID;
     }
-    
+
     /**
      * Acquire a lock for reading
      */
-    public synchronized void lockRead()
-    {
-    	// don't want writers or people waiting to write
-    	while (_writers > 0 || _waitWrite > 0)
-    	{
-    		try {
-				wait();
-			} catch (InterruptedException e) {				
-				e.printStackTrace();
-			}
-    	}
-    	// increment readers
-    	_readers++;
+    public synchronized void lockRead () {
+        // don't want writers or people waiting to write
+        while (_writers > 0 || _waitWrite > 0) {
+            try {
+                wait();
+            }
+            catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        // increment readers
+        _readers++;
     }
-    
+
     /**
      * Acquire a lock for writing
      */
-    public synchronized void lockWrite()
-    {
-    	// someone is waiting to write
-    	_waitWrite++;
-    	// don't want readers or other writers
-    	while (_readers > 0 || _writers > 0)
-    	{
-    		try {
-				wait();
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-    	}
-    	// increment writers
-    	_writers++;
-    	// no longer waiting
-    	_waitWrite--;    	
+    public synchronized void lockWrite () {
+        // someone is waiting to write
+        _waitWrite++;
+        // don't want readers or other writers
+        while (_readers > 0 || _writers > 0) {
+            try {
+                wait();
+            }
+            catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        // increment writers
+        _writers++;
+        // no longer waiting
+        _waitWrite--;
     }
-    
+
     /**
      * Release the lock on the Read
      */
-    public synchronized void unlockRead()
-    {
-    	// no longer reading
-    	_readers--;
-    	// let everyone know
-    	notifyAll();    	
+    public synchronized void unlockRead () {
+        // no longer reading
+        _readers--;
+        // let everyone know
+        notifyAll();
     }
-    
+
     /**
      * Release the lock on the Write
      */
-    public synchronized void unlockWrite()
-    {
-    	// no longer writing
-    	_writers--;
-    	// let the world know!
-    	notifyAll();    	
+    public synchronized void unlockWrite () {
+        // no longer writing
+        _writers--;
+        // let the world know!
+        notifyAll();
     }
 
 }

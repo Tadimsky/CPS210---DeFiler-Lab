@@ -5,13 +5,13 @@
 Name1: Patrick Royal
 Name2: Jonno Schmidt
 NetId1: par24
-NetId2: 
+NetId2: jas138
 
 ###############
 # Time spent
 ###############
 
-8 hours
+12 hours
 
 ####################################
 # Implementation details

@@ -77,7 +77,7 @@ public class VirtualDisk implements Runnable {
     private void processQueue () {
         RequestObject ro;
         synchronized (requestQueue) {
-            ro = requestQueue.poll();            
+            ro = requestQueue.poll();
         }
 
         if (ro == null) return;
@@ -150,14 +150,13 @@ public class VirtualDisk implements Runnable {
 
     @Override
     public void run () {
-    	running = true;
+        running = true;
         // Wait until there are items in the queue and then process them.
         while (running) {
             synchronized (requestQueue) {
-                try {                    
-                    while (!requestQueue.isEmpty())
-                    {
-                    	processQueue();
+                try {
+                    while (!requestQueue.isEmpty()) {
+                        processQueue();
                     }
                     requestQueue.wait();
                 }
@@ -168,14 +167,12 @@ public class VirtualDisk implements Runnable {
             }
         }
     }
-    
-    public void stopdisk()
-    {
-    	synchronized (requestQueue) {
-    		running = false;
-    		requestQueue.notifyAll();
-		}
+
+    public void stopdisk () {
+        synchronized (requestQueue) {
+            running = false;
+            requestQueue.notifyAll();
+        }
     }
-    
-    
+
 }

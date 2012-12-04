@@ -40,9 +40,8 @@ public class INode {
             for (int i = 0; i < blockmap.length; i++) {
                 // read the next index of the block
                 // TODO: error checking?
-            	int map = dis.readInt();
-            	if (map == 0)
-            		break;
+                int map = dis.readInt();
+                if (map == 0) break;
                 blockmap[i] = map;
             }
             // initialize the buffer array for the file

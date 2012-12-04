@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
-
 import sun.rmi.runtime.NewThreadAction;
 import virtualdisk.VirtualDisk;
 import common.Constants;
@@ -21,8 +20,6 @@ public class DFS {
     private Map<Integer, DFile> _dFiles;
     private SortedSet<Integer> _allocatedBlocks;
     private SortedSet<Integer> _freeBlocks;
-    
-    
 
     DBufferCache _cache;
 
@@ -42,8 +39,7 @@ public class DFS {
         catch (IOException e) {
             e.printStackTrace();
         }
-        
-        
+
     }
 
     /**
@@ -53,11 +49,11 @@ public class DFS {
         // Iterate through the blocks from 1 to the number of files
         for (int i = 1; i <= Constants.MAX_FILES; i++) {
             // Get the INode from the Disk
-            DBuffer block = _cache.getBlock(i);            
-        	if (!block.checkValid()) {        		
+            DBuffer block = _cache.getBlock(i);
+            if (!block.checkValid()) {
                 block.startFetch();
                 block.waitValid();
-            }			
+            }
 
             DFile dfile = INode.createDFile(block);
             if (dfile != null) _dFiles.put(dfile.get_dFID().get_dFID(), dfile);
@@ -73,7 +69,8 @@ public class DFS {
      * Check that no data block is listed for more than one DFile
      * Build the list of DFiles on the disk by scanning the INode region
      * Build a list of all allocated and free blocks on the VirtualDisk
-     * @throws Exception 
+     * 
+     * @throws Exception
      */
     public void init () throws Exception {
         // Build the list of DFiles on the disk by scanning the INode region
@@ -87,7 +84,7 @@ public class DFS {
             // number for every block in the DFile
             for (int i = 0; i < d.getNumBlocks(); i++) {
                 if (d.getMappedBlock(i) > common.Constants.NUM_OF_BLOCKS)
-                	throw new Exception();
+                    throw new Exception();
             }
         }
         // Build a list of all allocated and free blocks on the VirtualDisk
@@ -96,13 +93,10 @@ public class DFS {
                 int blockid = file.getMappedBlock(j);
                 if (blockid == -1) break;
                 // Check that no data block is listed for more than one DFile
-                if(blockid != 0)
-                {                	
-	                if (_allocatedBlocks.contains(blockid))
-	                {
-	                	throw new Exception("Invalid Block Allocation");
-	                }
-	                _allocatedBlocks.add(blockid);
+                if (blockid != 0) {
+                    if (_allocatedBlocks.contains(blockid)) { throw new Exception(
+                            "Invalid Block Allocation"); }
+                    _allocatedBlocks.add(blockid);
                 }
             }
         }
@@ -127,21 +121,19 @@ public class DFS {
         DFile newFile = new DFile(new DFileID(dFID));
         newFile.MapBlock(0, fileStart);
         _dFiles.put(dFID, newFile);
-        
+
         updateINode(newFile);
-        
+
         return new DFileID(dFID);
     }
-    
-    private synchronized void updateINode(DFile file)
-    {
-    	byte[] info = INode.createINode(file);
-        DBuffer inode = _cache.getBlock(file.get_dFID().get_dFID());        	
-        if (!inode.checkValid())
-        {
-        	inode.startFetch();
-        	inode.waitValid();
-        }        
+
+    private synchronized void updateINode (DFile file) {
+        byte[] info = INode.createINode(file);
+        DBuffer inode = _cache.getBlock(file.get_dFID().get_dFID());
+        if (!inode.checkValid()) {
+            inode.startFetch();
+            inode.waitValid();
+        }
         inode.write(info, 0, Constants.BLOCK_SIZE);
         inode.startPush();
     }
@@ -152,29 +144,29 @@ public class DFS {
      * @param dFID names the DFile
      * @throws Exception
      */
-    public void destroyFile (DFileID dFID){
-    	DFile file = _dFiles.get(dFID.get_dFID());
-    	if (file == null)
-        	return;
-    	
+    public void destroyFile (DFileID dFID) {
+        DFile file = _dFiles.get(dFID.get_dFID());
+        if (file == null) return;
+
         for (int i = 0; i < file.getNumBlocks(); i++) {
             int block = file.getMappedBlock(i);
             synchronized (_allocatedBlocks) {
-            	_allocatedBlocks.remove(block);
-			}
+                _allocatedBlocks.remove(block);
+            }
             synchronized (_freeBlocks) {
-            	_freeBlocks.add(block);
-			}            
+                _freeBlocks.add(block);
+            }
         }
         try {
-			file.setSize(0);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+            file.setSize(0);
+        }
+        catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
         synchronized (_dFiles) {
-        	_dFiles.remove(dFID.get_dFID());
-		}        
+            _dFiles.remove(dFID.get_dFID());
+        }
         // Size is 0 so it should not be read again
         updateINode(file);
     }
@@ -189,9 +181,8 @@ public class DFS {
      */
     public int read (DFileID dFID, byte[] ubuffer, int startOffset, int count) {
         DFile file = _dFiles.get(dFID.get_dFID());
-        if (file == null)
-        	return -1;
-        file.lockRead();        
+        if (file == null) return -1;
+        file.lockRead();
         int nb = file.getNumBlocks();
         int s = startOffset;
         int done = count;
@@ -206,7 +197,7 @@ public class DFS {
             int read = d.read(ubuffer, s, done);
             done -= read;
             s += read;
-        }    
+        }
         file.unlockRead();
         return count;
     }
@@ -222,9 +213,8 @@ public class DFS {
      */
     public int write (DFileID dFID, byte[] ubuffer, int startOffset, int count) {
         DFile file = _dFiles.get(dFID.get_dFID());
-        if (file == null)
-        	return -1;
-        
+        if (file == null) return -1;
+
         file.lockWrite();
         int delta = file.changeinBlocks(count);
         if (delta < 0) {
@@ -232,12 +222,12 @@ public class DFS {
             delta *= -1;
             for (int i = file.getNumBlocks(); i > file.getNumBlocks() - delta; i--) {
                 // free these blocks
-            	synchronized (_freeBlocks) {
-            		_freeBlocks.add(file.getMappedBlock(i - 1));
-            	}
+                synchronized (_freeBlocks) {
+                    _freeBlocks.add(file.getMappedBlock(i - 1));
+                }
                 synchronized (_allocatedBlocks) {
-                	_allocatedBlocks.remove(file.getMappedBlock(i - 1));
-				}                
+                    _allocatedBlocks.remove(file.getMappedBlock(i - 1));
+                }
             }
         }
         else {
@@ -246,11 +236,11 @@ public class DFS {
                 if (_freeBlocks.size() > 0) {
                     int newblock = _freeBlocks.first();
                     synchronized (_freeBlocks) {
-                    	_freeBlocks.remove(newblock);
-					}
+                        _freeBlocks.remove(newblock);
+                    }
                     synchronized (_allocatedBlocks) {
-                    	_allocatedBlocks.add(newblock);
-					}
+                        _allocatedBlocks.add(newblock);
+                    }
 
                     file.MapBlock(i, newblock);
                 }
@@ -271,20 +261,18 @@ public class DFS {
 
         for (int i = 0; i < nb; i++) {
             DBuffer d = _cache.getBlock(file.getMappedBlock(i));
-            
-            
-            	if (!d.checkValid()) {
-                    d.startFetch();
-                    d.waitValid();
-                }
-			            
+
+            if (!d.checkValid()) {
+                d.startFetch();
+                d.waitValid();
+            }
 
             int wrote = d.write(ubuffer, s, done);
             done -= wrote;
             s += wrote;
         }
-        
-        updateINode(file);        
+
+        updateINode(file);
         file.unlockWrite();
         return count;
     }
@@ -306,12 +294,11 @@ public class DFS {
     public void sync () {
         _cache.sync();
     }
-    
+
     /**
      * Stop the Threads
      */
-    public void shutdown()
-    {
-    	_cache.shutdown();
+    public void shutdown () {
+        _cache.shutdown();
     }
 }
