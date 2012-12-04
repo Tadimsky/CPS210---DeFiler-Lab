@@ -60,7 +60,7 @@ public class DFS {
 
     /**
      * Called by test programs.
-     * Check that each DFile has exactly one INode
+     * Check that each DFile has exactly one INode (handled in DFile creation)
      * Check that the size of each DFile is a legal value
      * Check that the block maps of all DFiles have a valid block number for
      * every block in the DFile
@@ -69,21 +69,27 @@ public class DFS {
      * Build a list of all allocated and free blocks on the VirtualDisk
      */
     public void init () {
+        // Build the list of DFiles on the disk by scanning the INode region
         LoadDFileList();
         for (int id : _dFiles.keySet()) {
             DFile d = _dFiles.get(id);
-            // TODO Check that each DFile has exactly one INode
+            // Check that the size of each DFile is a legal value
             if (d.getSize() > common.Constants.MAX_FILE_BLOCKS
                     * Constants.BLOCK_SIZE) return;
-            // TODO Check that the block maps of all DFiles have a valid block
+            // Check that the block maps of all DFiles have a valid block
             // number for every block in the DFile
-            // TODO Check that no data block is listed for more than one DFile
+            for (int i = 0; i < d.getNumBlocks(); i++) {
+                if (d.getMappedBlock(i) > common.Constants.NUM_OF_BLOCKS)
+                    return;
+            }
         }
-
+        // Build a list of all allocated and free blocks on the VirtualDisk
         for (DFile file : _dFiles.values()) {
             for (int j = 0; j < Constants.NUM_OF_BLOCKS; j++) {
                 int blockid = file.getMappedBlock(j);
                 if (blockid == -1) break;
+                // Check that no data block is listed for more than one DFile
+                if (_allocatedBlocks.contains(blockid)) return;
                 _allocatedBlocks.add(blockid);
             }
         }
